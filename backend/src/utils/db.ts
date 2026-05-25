@@ -101,8 +101,16 @@ export interface Booking {
 }
 
 // ─── Database setup ──────────────────────────────────────
-const DB_DIR = path.join(__dirname, '..', '..', 'data');
-const DB_PATH = path.join(DB_DIR, 'voisigo.db');
+// DB_PATH env var allows Railway/Docker to mount a persistent volume
+// e.g. DB_PATH=/app/data/voisigo.db
+const DB_DIR = process.env.DB_PATH
+    ? path.dirname(process.env.DB_PATH)
+    : path.join(__dirname, '..', '..', 'data');
+
+const DB_PATH = process.env.DB_PATH
+    ? process.env.DB_PATH
+    : path.join(DB_DIR, 'voisigo.db');
+
 const JSON_PATH = path.join(DB_DIR, 'database.json');
 
 if (!fs.existsSync(DB_DIR)) {
