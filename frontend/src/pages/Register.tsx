@@ -20,10 +20,15 @@ export default function Register() {
                 body: JSON.stringify({ name, email, password }),
             });
 
-            const data = await response.json();
+            // Defensive JSON parsing — backend might return HTML on 502/503
+            const text = await response.text();
+            let data: { message?: string } = {};
+            try { data = JSON.parse(text); } catch {
+                throw new Error(`Serveur inaccessible (${response.status}). Vérifiez que le backend est démarré.`);
+            }
 
             if (!response.ok) {
-                throw new Error(data.message || 'Registration failed');
+                throw new Error(data.message || 'Inscription échouée');
             }
 
             navigate('/login');
