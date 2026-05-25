@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Layout from '../../components/Layout';
-import { MapContainer as LeafletMap, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
+import TripRouteMap from '../../components/TripRouteMap';
 import { API_BASE_URL } from '../../lib/api';
 import type { Trip, Booking } from '../../types';
 import StarRating from '../../components/StarRating';
@@ -11,13 +9,6 @@ import ReviewModal from '../../components/ReviewModal';
 import { useToast } from '../../context/UIContext';
 import { useConfirm } from '../../context/UIContext';
 
-// Fix Leaflet default icons
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-});
 
 export default function TripDetail() {
     const { id } = useParams<{ id: string }>();
@@ -373,29 +364,32 @@ export default function TripDetail() {
                         )}
                     </div>
 
-                    {/* Map */}
+                    {/* Map — real road route via OSRM */}
                     {hasMap && (
                         <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
-                            <div className="p-4 border-b border-gray-100">
+                            <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
                                 <h3 className="font-bold text-gray-800">🗺️ Itinéraire</h3>
+                                {trip.departureLat && (
+                                    <a
+                                        href={`https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=${trip.departureLat},${trip.departureLon};${trip.destinationLat},${trip.destinationLon}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-xs text-blue-500 hover:text-blue-700 font-medium"
+                                    >
+                                        Ouvrir dans OSM →
+                                    </a>
+                                )}
                             </div>
-                            <div className="h-64">
-                                <LeafletMap
-                                    center={[
-                                        ((trip.departureLat! + trip.destinationLat!) / 2),
-                                        ((trip.departureLon! + trip.destinationLon!) / 2),
-                                    ]}
-                                    zoom={11}
-                                    style={{ height: '100%', width: '100%' }}
-                                >
-                                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                                    <Marker position={[trip.departureLat!, trip.departureLon!]}>
-                                        <Popup>📍 Départ : {trip.departure}</Popup>
-                                    </Marker>
-                                    <Marker position={[trip.destinationLat!, trip.destinationLon!]}>
-                                        <Popup>🏁 Arrivée : {trip.destination}</Popup>
-                                    </Marker>
-                                </LeafletMap>
+                            <div className="p-3">
+                                <TripRouteMap
+                                    departureLat={trip.departureLat!}
+                                    departureLon={trip.departureLon!}
+                                    destinationLat={trip.destinationLat!}
+                                    destinationLon={trip.destinationLon!}
+                                    departure={trip.departure}
+                                    destination={trip.destination}
+                                    height="320px"
+                                />
                             </div>
                         </div>
                     )}

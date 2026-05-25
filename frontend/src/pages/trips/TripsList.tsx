@@ -4,12 +4,14 @@ import Layout from '../../components/Layout';
 import { API_BASE_URL } from '../../lib/api';
 import type { Trip, Booking } from '../../types';
 import StarRating from '../../components/StarRating';
+import TripRouteMap from '../../components/TripRouteMap';
 import { useToast, useConfirm } from '../../context/UIContext';
 
 export default function TripsList() {
     const [trips, setTrips] = useState<Trip[]>([]);
     const [myBookingsMap, setMyBookingsMap] = useState<Record<string, Booking>>({});
     const [loading, setLoading] = useState(true);
+    const [expandedMapId, setExpandedMapId] = useState<string | null>(null);
     const toast = useToast();
     const confirm = useConfirm();
 
@@ -180,6 +182,33 @@ export default function TripsList() {
                                                     ) : null}
                                                 </div>
                                             </div>
+
+                                            {/* Map toggle button — only if coords available */}
+                                            {trip.departureLat && trip.departureLon && trip.destinationLat && trip.destinationLon && (
+                                                <div className="px-5 pb-2">
+                                                    <button
+                                                        onClick={() => setExpandedMapId(expandedMapId === trip.id ? null : trip.id)}
+                                                        className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors"
+                                                    >
+                                                        {expandedMapId === trip.id ? '🗺️ Masquer l\'itinéraire ▲' : '🗺️ Voir l\'itinéraire ▼'}
+                                                    </button>
+                                                </div>
+                                            )}
+
+                                            {/* Inline route map */}
+                                            {expandedMapId === trip.id && trip.departureLat && trip.departureLon && trip.destinationLat && trip.destinationLon && (
+                                                <div className="px-5 pb-5 pt-1">
+                                                    <TripRouteMap
+                                                        departureLat={trip.departureLat}
+                                                        departureLon={trip.departureLon}
+                                                        destinationLat={trip.destinationLat}
+                                                        destinationLon={trip.destinationLon}
+                                                        departure={trip.departure}
+                                                        destination={trip.destination}
+                                                        height="220px"
+                                                    />
+                                                </div>
+                                            )}
 
                                             {/* Right: price + seats + actions */}
                                             <div className="flex flex-col items-end justify-between gap-2 min-w-[130px]">
