@@ -17,7 +17,24 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(helmet());
-app.use(cors());
+
+// CORS : en prod, restreindre aux origines autorisées via ALLOWED_ORIGINS
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+    : ['http://localhost:5173', 'http://localhost:4173'];
+
+app.use(cors({
+    origin: (origin, callback) => {
+        // Autoriser les requêtes sans origine (ex: curl, Postman, mobile)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.some(o => origin.startsWith(o))) {
+            return callback(null, true);
+        }
+        callback(new Error(`CORS bloqué pour l'origine: ${origin}`));
+    },
+    credentials: true,
+}));
+
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
