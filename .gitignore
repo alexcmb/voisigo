@@ -1,0 +1,168 @@
+# ─────────────────────────────────────────────────────────
+#  VoisiGO — .gitignore racine
+# ─────────────────────────────────────────────────────────
+
+# ── Node / npm ───────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+
+# ── Build outputs ─────────────────────────────────────────
+dist/
+dist-ssr/
+build/
+*.local
+backend/dist/
+
+# ── Variables d'environnement ─────────────────────────────
+# Ne jamais committer de secrets, tokens ou mots de passe
+.env
+.env.*
+!.env.example
+
+# ── Base de données SQLite ────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+data/*.db
+backend/data/
+
+# ── Archives / artefacts de déploiement ──────────────────
+*.tar.gz
+*.zip
+*.gz
+*.tgz
+
+# ──────────────────────────────────────────────────────────
+#  TERRAFORM
+# ──────────────────────────────────────────────────────────
+
+# Binaires Terraform (Windows, Linux, macOS)
+terraform.exe
+terraform
+terraform_*
+
+# Répertoire de plugins et providers (lourd, re-téléchargeable)
+**/.terraform/
+.terraform/
+
+# State files — contiennent l'infrastructure réelle et parfois des secrets
+terraform.tfstate
+terraform.tfstate.*
+*.tfstate
+*.tfstate.backup
+
+# Variables contenant des secrets (tokens, mots de passe, clés)
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+
+# Fichiers de plan générés
+*.tfplan
+*.plan
+
+# Override files (utilisés localement, pas à partager)
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Fichier de lock des providers (optionnel — certaines équipes le committent)
+# Décommentez la ligne ci-dessous si vous ne voulez PAS le versionner :
+# .terraform.lock.hcl
+
+# ──────────────────────────────────────────────────────────
+#  CLÉS & CERTIFICATS — CRITIQUE
+# ──────────────────────────────────────────────────────────
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cert
+*.cer
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+private_key*
+*_private_key*
+
+# ──────────────────────────────────────────────────────────
+#  DOCKER
+# ──────────────────────────────────────────────────────────
+# Volumes Docker locaux (si montés dans le projet)
+docker-volumes/
+.docker/
+
+# ──────────────────────────────────────────────────────────
+#  PRISMA (généré)
+# ──────────────────────────────────────────────────────────
+src/generated/prisma/
+backend/src/generated/
+
+# ──────────────────────────────────────────────────────────
+#  ÉDITEURS & IDE
+# ──────────────────────────────────────────────────────────
+
+# VS Code (on garde seulement les extensions recommandées)
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# JetBrains (WebStorm, IntelliJ…)
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Vim / Emacs
+*.swp
+*.swo
+*~
+\#*\#
+
+# ──────────────────────────────────────────────────────────
+#  SYSTÈMES D'EXPLOITATION
+# ──────────────────────────────────────────────────────────
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+.directory
+.Trash-*
+
+# ──────────────────────────────────────────────────────────
+#  DIVERS
+# ──────────────────────────────────────────────────────────
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Coverage / tests
+coverage/
+.nyc_output/
+
+# Temp
+tmp/
+temp/
+.cache/

@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgis/postgis:15-3.3
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: voisigo
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: on-failure
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/voisigo?schema=public
+      - PORT=3000
+      - JWT_SECRET=voisigo_super_secret_jwt_key_2024_change_in_prod
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Certificats Let's Encrypt partagés avec Certbot
+      - certbot_certs:/etc/letsencrypt
+      # Dossier challenge ACME partagé avec Certbot
+      - certbot_www:/var/www/certbot
+    depends_on:
+      - backend
+
+  # Certbot : obtention et renouvellement automatique des certificats SSL
+  certbot:
+    image: certbot/certbot:latest
+    restart: unless-stopped
+    volumes:
+      - certbot_certs:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    # Renouvellement toutes les 12h (Let's Encrypt expire après 90j)
+    entrypoint: /bin/sh -c "trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done"
+
+volumes:
+  db_data:
+  certbot_certs:
+  certbot_www:

@@ -1,0 +1,38 @@
+{
+  "users": [
+    {
+      "id": "cfa95a88-a4c9-4b77-b987-56d96e79cbf1",
+      "email": "test@test.com",
+      "passwordHash": "$2b$10$YeC9RiKAcC68sL4QxD9.4.JB3Xt3Hba/DO5hjVp3oZanJ/q0C52hC",
+      "name": "Test User",
+      "createdAt": "2026-01-15T13:36:38.672Z"
+    },
+    {
+      "id": "1c3cb674-5860-45bc-b7dc-ce621214aaef",
+      "email": "hello@hello.fr",
+      "passwordHash": "$2b$10$2aM8t1TBXS7RQBvxWuj1B.5VPTPw6rOxGGgt7yZb1jv6KT7fMEwBq",
+      "name": "Hello",
+      "createdAt": "2026-01-15T13:46:35.429Z",
+      "avatarUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Alice",
+      "bio": "J'aime conduire"
+    }
+  ],
+  "trips": [
+    {
+      "id": "80ef609c-635e-4372-8fdb-9c7800477951",
+      "driverId": "1c3cb674-5860-45bc-b7dc-ce621214aaef",
+      "driverName": "Hello",
+      "departure": "4 Rue de Paris 92100 Boulogne-Billancourt",
+      "destination": "8 Boulevard des Poilus 44000 Nantes",
+      "departureLat": 48.839079,
+      "departureLon": 2.250753,
+      "destinationLat": 47.228842,
+      "destinationLon": -1.526662,
+      "date": "2026-02-19T18:00",
+      "price": 5,
+      "seats": 3,
+      "createdAt": "2026-02-13T09:45:31.884Z"
+    }
+  ],
+  "services": []
+}
