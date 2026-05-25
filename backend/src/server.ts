@@ -18,18 +18,17 @@ const PORT = process.env.PORT || 3000;
 
 app.use(helmet());
 
-// CORS : en prod, restreindre aux origines autorisées via ALLOWED_ORIGINS
+// CORS — autorise localhost (dev) + tous les *.vercel.app (demo) + origines configurées
 const allowedOrigins = process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
-    : ['http://localhost:5173', 'http://localhost:4173'];
+    : [];
 
 app.use(cors({
     origin: (origin, callback) => {
-        // Autoriser les requêtes sans origine (ex: curl, Postman, mobile)
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.some(o => origin.startsWith(o))) {
-            return callback(null, true);
-        }
+        if (!origin) return callback(null, true); // curl, Postman, etc.
+        if (origin.startsWith('http://localhost')) return callback(null, true);
+        if (origin.endsWith('.vercel.app')) return callback(null, true);
+        if (allowedOrigins.some(o => origin.startsWith(o))) return callback(null, true);
         callback(new Error(`CORS bloqué pour l'origine: ${origin}`));
     },
     credentials: true,
@@ -48,6 +47,12 @@ app.use('/api/bookings', bookingsRoutes);
 
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date() });
+});
+
+// Global JSON error handler (évite les réponses HTML sur les erreurs Express)
+app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    console.error(err.message);
+    res.status(500).json({ message: err.message || 'Internal server error' });
 });
 
 app.listen(PORT, () => {
