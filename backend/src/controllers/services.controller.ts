@@ -16,7 +16,7 @@ const serviceSchema = z.object({
     date: z.string().optional(),
 });
 
-export const createService = (req: AuthRequest, res: Response) => {
+export const createService = async (req: AuthRequest, res: Response) => {
     try {
         if (!req.user) {
             res.status(401).json({ message: 'Unauthorized' });
@@ -24,7 +24,7 @@ export const createService = (req: AuthRequest, res: Response) => {
         }
 
         const data = serviceSchema.parse(req.body);
-        const author = findUserById(req.user.userId);
+        const author = await findUserById(req.user.userId);
         const authorName = author ? author.name : 'Unknown User';
 
         const newService: Service = {
@@ -40,19 +40,19 @@ export const createService = (req: AuthRequest, res: Response) => {
             createdAt: new Date().toISOString(),
         };
 
-        dbCreateService(newService);
+        await dbCreateService(newService);
         res.status(201).json({ message: 'Service created', service: newService });
     } catch (error: any) {
         res.status(400).json({ message: error.message || 'Validation error' });
     }
 };
 
-export const getServices = (req: AuthRequest, res: Response) => {
+export const getServices = async (req: AuthRequest, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
     const authorId = req.query.my === 'true' && req.user ? req.user.userId : undefined;
 
-    const { services, total } = dbGetServices(page, limit, authorId);
+    const { services, total } = await dbGetServices(page, limit, authorId);
 
     res.json({
         data: services,
@@ -64,7 +64,7 @@ export const getServices = (req: AuthRequest, res: Response) => {
     });
 };
 
-export const deleteService = (req: AuthRequest, res: Response) => {
+export const deleteService = async (req: AuthRequest, res: Response) => {
     try {
         if (!req.user) {
             res.status(401).json({ message: 'Unauthorized' });
@@ -72,7 +72,7 @@ export const deleteService = (req: AuthRequest, res: Response) => {
         }
 
         const id = req.params.id as string;
-        const service = findServiceById(id);
+        const service = await findServiceById(id);
 
         if (!service) {
             res.status(404).json({ message: 'Service not found' });
@@ -84,7 +84,7 @@ export const deleteService = (req: AuthRequest, res: Response) => {
             return;
         }
 
-        deleteServiceById(id);
+        await deleteServiceById(id);
         res.json({ message: 'Service deleted successfully' });
     } catch (error: any) {
         res.status(400).json({ message: error.message || 'Error deleting service' });

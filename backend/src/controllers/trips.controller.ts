@@ -29,7 +29,7 @@ const tripSchema = z.object({
     description: z.string().optional(),
 });
 
-export const createTrip = (req: AuthRequest, res: Response) => {
+export const createTrip = async (req: AuthRequest, res: Response) => {
     try {
         if (!req.user) {
             res.status(401).json({ message: 'Unauthorized' });
@@ -37,7 +37,7 @@ export const createTrip = (req: AuthRequest, res: Response) => {
         }
 
         const data = tripSchema.parse(req.body);
-        const driver = findUserById(req.user.userId);
+        const driver = await findUserById(req.user.userId);
         const driverName = driver ? driver.name : 'Unknown Driver';
 
         const newTrip: Trip = {
@@ -48,22 +48,21 @@ export const createTrip = (req: AuthRequest, res: Response) => {
             createdAt: new Date().toISOString(),
         };
 
-        dbCreateTrip(newTrip);
+        await dbCreateTrip(newTrip);
         res.status(201).json({ message: 'Trip created successfully', trip: newTrip });
     } catch (error: any) {
         res.status(400).json({ message: error.message || 'Validation error' });
     }
 };
 
-// GET /api/trips — List enriched trips (availableSeats, driverRating, pendingCount in one query)
-export const getTrips = (req: AuthRequest, res: Response) => {
+// GET /api/trips — List enriched trips
+export const getTrips = async (req: AuthRequest, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
     const driverId = req.query.my === 'true' && req.user ? req.user.userId : undefined;
 
-    const { trips, total } = getTripsEnriched(page, limit, driverId);
+    const { trips, total } = await getTripsEnriched(page, limit, driverId);
 
-    // Shape driverRating for frontend consumption
     const shaped = trips.map(t => ({
         ...t,
         driverRating: t.driverRatingCount > 0
@@ -81,10 +80,10 @@ export const getTrips = (req: AuthRequest, res: Response) => {
     });
 };
 
-// GET /api/trips/:id — Single enriched trip (with bookings if driver)
-export const getTripById = (req: AuthRequest, res: Response) => {
+// GET /api/trips/:id
+export const getTripById = async (req: AuthRequest, res: Response) => {
     const id = req.params.id as string;
-    const trip = findTripEnrichedById(id);
+    const trip = await findTripEnrichedById(id);
 
     if (!trip) {
         res.status(404).json({ message: 'Trip not found' });
@@ -98,9 +97,8 @@ export const getTripById = (req: AuthRequest, res: Response) => {
             : null,
     };
 
-    // If the requester is the driver, include all bookings
     if (req.user && req.user.userId === trip.driverId) {
-        const bookings = getBookingsForTrip(id);
+        const bookings = await getBookingsForTrip(id);
         res.json({ trip: shaped, bookings });
         return;
     }
@@ -108,7 +106,7 @@ export const getTripById = (req: AuthRequest, res: Response) => {
     res.json({ trip: shaped, bookings: [] });
 };
 
-export const deleteTrip = (req: AuthRequest, res: Response) => {
+export const deleteTrip = async (req: AuthRequest, res: Response) => {
     try {
         if (!req.user) {
             res.status(401).json({ message: 'Unauthorized' });
@@ -116,7 +114,7 @@ export const deleteTrip = (req: AuthRequest, res: Response) => {
         }
 
         const id = req.params.id as string;
-        const trip = findTripById(id);
+        const trip = await findTripById(id);
 
         if (!trip) {
             res.status(404).json({ message: 'Trip not found' });
@@ -128,15 +126,15 @@ export const deleteTrip = (req: AuthRequest, res: Response) => {
             return;
         }
 
-        deleteTripById(id);
+        await deleteTripById(id);
         res.json({ message: 'Trip deleted successfully' });
     } catch (error: any) {
         res.status(400).json({ message: error.message || 'Error deleting trip' });
     }
 };
 
-// PATCH /api/trips/:id/complete — Driver marks trip as completed
-export const completeTrip = (req: AuthRequest, res: Response) => {
+// PATCH /api/trips/:id/complete
+export const completeTrip = async (req: AuthRequest, res: Response) => {
     try {
         if (!req.user) {
             res.status(401).json({ message: 'Unauthorized' });
@@ -144,7 +142,7 @@ export const completeTrip = (req: AuthRequest, res: Response) => {
         }
 
         const id = req.params.id as string;
-        const trip = findTripById(id);
+        const trip = await findTripById(id);
 
         if (!trip) {
             res.status(404).json({ message: 'Trip not found' });
@@ -161,11 +159,9 @@ export const completeTrip = (req: AuthRequest, res: Response) => {
             return;
         }
 
-        // Mark as completed in DB
-        completeTripById(id);
+        await completeTripById(id);
 
-        // Notify all passengers
-        const bookings = getBookingsForTrip(id);
+        const bookings = await getBookingsForTrip(id);
         for (const booking of bookings) {
             const notif: Notification = {
                 id: uuidv4(),
@@ -178,7 +174,7 @@ export const completeTrip = (req: AuthRequest, res: Response) => {
                 read: 0,
                 createdAt: new Date().toISOString(),
             };
-            createNotification(notif);
+            await createNotification(notif);
         }
 
         res.json({ message: 'Trip marked as completed' });

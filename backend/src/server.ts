@@ -2,6 +2,7 @@ import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { initDb } from './utils/db';
 import authRoutes from './routes/auth.routes';
 import tripsRoutes from './routes/trips.routes';
 import servicesRoutes from './routes/services.routes';
@@ -55,6 +56,13 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
     res.status(500).json({ message: err.message || 'Internal server error' });
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+initDb()
+    .then(() => {
+        app.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
+        });
+    })
+    .catch(err => {
+        console.error('❌ Failed to initialize database:', err);
+        process.exit(1);
+    });

@@ -22,7 +22,7 @@ export const register = async (req: any, res: Response) => {
     try {
         const data = registerSchema.parse(req.body);
 
-        const existingUser = findUserByEmail(data.email);
+        const existingUser = await findUserByEmail(data.email);
         if (existingUser) {
             res.status(409).json({ message: 'Email already registered' });
             return;
@@ -39,7 +39,7 @@ export const register = async (req: any, res: Response) => {
             createdAt: new Date().toISOString(),
         };
 
-        dbCreateUser(newUser);
+        await dbCreateUser(newUser);
 
         const token = jwt.sign({ userId: newUser.id, email: newUser.email }, JWT_SECRET, { expiresIn: '24h' });
         res.status(201).json({
@@ -56,7 +56,7 @@ export const login = async (req: any, res: Response) => {
     try {
         const data = loginSchema.parse(req.body);
 
-        const user = findUserByEmail(data.email);
+        const user = await findUserByEmail(data.email);
         if (!user) {
             res.status(401).json({ message: 'Invalid credentials' });
             return;

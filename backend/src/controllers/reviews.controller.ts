@@ -22,8 +22,8 @@ const createReviewSchema = z.object({
     relatedId: z.string().optional(),
 });
 
-// POST /api/reviews — Leave a review
-export const createReview = (req: AuthRequest, res: Response) => {
+// POST /api/reviews
+export const createReview = async (req: AuthRequest, res: Response) => {
     try {
         if (!req.user) {
             res.status(401).json({ message: 'Unauthorized' });
@@ -37,23 +37,21 @@ export const createReview = (req: AuthRequest, res: Response) => {
             return;
         }
 
-        const targetUser = findUserById(data.targetUserId);
+        const targetUser = await findUserById(data.targetUserId);
         if (!targetUser) {
             res.status(404).json({ message: 'User not found' });
             return;
         }
 
-        // Prevent duplicate review per context
         if (data.relatedType && data.relatedId) {
-            if (hasAlreadyReviewed(req.user.userId, data.relatedType, data.relatedId)) {
+            if (await hasAlreadyReviewed(req.user.userId, data.relatedType, data.relatedId)) {
                 res.status(409).json({ message: 'You have already reviewed this' });
                 return;
             }
         }
 
-        // For trips: only allow review after driver has marked trip as completed
         if (data.relatedType === 'trip' && data.relatedId) {
-            const trip = findTripById(data.relatedId);
+            const trip = await findTripById(data.relatedId);
             if (!trip) {
                 res.status(404).json({ message: 'Trip not found' });
                 return;
@@ -64,7 +62,7 @@ export const createReview = (req: AuthRequest, res: Response) => {
             }
         }
 
-        const reviewer = findUserById(req.user.userId);
+        const reviewer = await findUserById(req.user.userId);
         const review: Review = {
             id: uuidv4(),
             reviewerId: req.user.userId,
@@ -77,9 +75,8 @@ export const createReview = (req: AuthRequest, res: Response) => {
             createdAt: new Date().toISOString(),
         };
 
-        dbCreateReview(review);
+        await dbCreateReview(review);
 
-        // Notify the reviewed user
         const notif: Notification = {
             id: uuidv4(),
             userId: data.targetUserId,
@@ -91,7 +88,7 @@ export const createReview = (req: AuthRequest, res: Response) => {
             read: 0,
             createdAt: new Date().toISOString(),
         };
-        createNotification(notif);
+        await createNotification(notif);
 
         res.status(201).json({ review });
     } catch (error: any) {
@@ -99,10 +96,10 @@ export const createReview = (req: AuthRequest, res: Response) => {
     }
 };
 
-// GET /api/reviews/user/:userId — Reviews for a user
-export const getUserReviews = (req: AuthRequest, res: Response) => {
+// GET /api/reviews/user/:userId
+export const getUserReviews = async (req: AuthRequest, res: Response) => {
     const userId = req.params.userId as string;
-    const reviews = getReviewsForUser(userId);
-    const rating = getAverageRating(userId);
+    const reviews = await getReviewsForUser(userId);
+    const rating = await getAverageRating(userId);
     res.json({ reviews, averageRating: Math.round(rating.avg * 10) / 10, totalReviews: rating.count });
 };

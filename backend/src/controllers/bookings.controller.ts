@@ -23,8 +23,8 @@ const createBookingSchema = z.object({
     seats: z.number().min(1).default(1),
 });
 
-// POST /api/bookings — Reserve a seat
-export const createBooking = (req: AuthRequest, res: Response) => {
+// POST /api/bookings
+export const createBooking = async (req: AuthRequest, res: Response) => {
     try {
         if (!req.user) {
             res.status(401).json({ message: 'Unauthorized' });
@@ -32,7 +32,7 @@ export const createBooking = (req: AuthRequest, res: Response) => {
         }
 
         const data = createBookingSchema.parse(req.body);
-        const trip = findTripById(data.tripId);
+        const trip = await findTripById(data.tripId);
 
         if (!trip) {
             res.status(404).json({ message: 'Trip not found' });
@@ -44,18 +44,18 @@ export const createBooking = (req: AuthRequest, res: Response) => {
             return;
         }
 
-        if (hasAlreadyBooked(data.tripId, req.user.userId)) {
+        if (await hasAlreadyBooked(data.tripId, req.user.userId)) {
             res.status(409).json({ message: 'Already booked this trip' });
             return;
         }
 
-        const available = getAvailableSeats(data.tripId);
+        const available = await getAvailableSeats(data.tripId);
         if (available < data.seats) {
             res.status(400).json({ message: `Not enough seats available (${available} left)` });
             return;
         }
 
-        const passenger = findUserById(req.user.userId);
+        const passenger = await findUserById(req.user.userId);
         const booking: Booking = {
             id: uuidv4(),
             tripId: data.tripId,
@@ -66,9 +66,8 @@ export const createBooking = (req: AuthRequest, res: Response) => {
             createdAt: new Date().toISOString(),
         };
 
-        dbCreateBooking(booking);
+        await dbCreateBooking(booking);
 
-        // Notify the driver
         const notif: Notification = {
             id: uuidv4(),
             userId: trip.driverId,
@@ -80,7 +79,7 @@ export const createBooking = (req: AuthRequest, res: Response) => {
             read: 0,
             createdAt: new Date().toISOString(),
         };
-        createNotification(notif);
+        await createNotification(notif);
 
         res.status(201).json({ booking, message: 'Booking request sent' });
     } catch (error: any) {
@@ -88,15 +87,15 @@ export const createBooking = (req: AuthRequest, res: Response) => {
     }
 };
 
-// DELETE /api/bookings/:id — Cancel a booking
-export const cancelBookingController = (req: AuthRequest, res: Response) => {
+// DELETE /api/bookings/:id
+export const cancelBookingController = async (req: AuthRequest, res: Response) => {
     if (!req.user) {
         res.status(401).json({ message: 'Unauthorized' });
         return;
     }
 
     const bookingId = req.params.id as string;
-    const booking = findBookingById(bookingId);
+    const booking = await findBookingById(bookingId);
 
     if (!booking) {
         res.status(404).json({ message: 'Booking not found' });
@@ -108,10 +107,9 @@ export const cancelBookingController = (req: AuthRequest, res: Response) => {
         return;
     }
 
-    dbCancelBooking(bookingId);
+    await dbCancelBooking(bookingId);
 
-    // Notify the driver
-    const trip = findTripById(booking.tripId);
+    const trip = await findTripById(booking.tripId);
     if (trip) {
         const notif: Notification = {
             id: uuidv4(),
@@ -124,53 +122,53 @@ export const cancelBookingController = (req: AuthRequest, res: Response) => {
             read: 0,
             createdAt: new Date().toISOString(),
         };
-        createNotification(notif);
+        await createNotification(notif);
     }
 
     res.json({ success: true });
 };
 
-// GET /api/bookings/trip/:tripId — Passengers for a trip
-export const getTripPassengers = (req: AuthRequest, res: Response) => {
+// GET /api/bookings/trip/:tripId
+export const getTripPassengers = async (req: AuthRequest, res: Response) => {
     if (!req.user) {
         res.status(401).json({ message: 'Unauthorized' });
         return;
     }
 
     const tripId = req.params.tripId as string;
-    const trip = findTripById(tripId);
+    const trip = await findTripById(tripId);
 
     if (!trip) {
         res.status(404).json({ message: 'Trip not found' });
         return;
     }
 
-    const bookings = getBookingsForTrip(tripId);
-    const available = getAvailableSeats(tripId);
+    const bookings = await getBookingsForTrip(tripId);
+    const available = await getAvailableSeats(tripId);
     res.json({ bookings, availableSeats: available, totalSeats: trip.seats });
 };
 
-// GET /api/bookings/my — My bookings
-export const getMyBookings = (req: AuthRequest, res: Response) => {
+// GET /api/bookings/my
+export const getMyBookings = async (req: AuthRequest, res: Response) => {
     if (!req.user) {
         res.status(401).json({ message: 'Unauthorized' });
         return;
     }
 
-    const bookings = getBookingsForUser(req.user.userId);
+    const bookings = await getBookingsForUser(req.user.userId);
     res.json(bookings);
 };
 
-// GET /api/bookings/seats/:tripId — Available seats (public)
-export const getSeats = (req: AuthRequest, res: Response) => {
+// GET /api/bookings/seats/:tripId
+export const getSeats = async (req: AuthRequest, res: Response) => {
     const tripId = req.params.tripId as string;
-    const available = getAvailableSeats(tripId);
-    const trip = findTripById(tripId);
+    const available = await getAvailableSeats(tripId);
+    const trip = await findTripById(tripId);
     res.json({ availableSeats: available, totalSeats: trip?.seats || 0 });
 };
 
-// PATCH /api/bookings/:id/approve — Approve a booking
-export const approveBooking = (req: AuthRequest, res: Response) => {
+// PATCH /api/bookings/:id/approve
+export const approveBooking = async (req: AuthRequest, res: Response) => {
     try {
         if (!req.user) {
             res.status(401).json({ message: 'Unauthorized' });
@@ -178,14 +176,14 @@ export const approveBooking = (req: AuthRequest, res: Response) => {
         }
 
         const bookingId = req.params.id as string;
-        const booking = findBookingById(bookingId);
+        const booking = await findBookingById(bookingId);
 
         if (!booking) {
             res.status(404).json({ message: 'Booking not found' });
             return;
         }
 
-        const trip = findTripById(booking.tripId);
+        const trip = await findTripById(booking.tripId);
         if (!trip) {
             res.status(404).json({ message: 'Trip not found' });
             return;
@@ -201,15 +199,14 @@ export const approveBooking = (req: AuthRequest, res: Response) => {
             return;
         }
 
-        const available = getAvailableSeats(trip.id);
+        const available = await getAvailableSeats(trip.id);
         if (available < booking.seats) {
             res.status(400).json({ message: `Not enough seats available (${available} left)` });
             return;
         }
 
-        updateBookingStatus(bookingId, 'confirmed');
+        await updateBookingStatus(bookingId, 'confirmed');
 
-        // Notify passenger
         const notif: Notification = {
             id: uuidv4(),
             userId: booking.passengerId,
@@ -221,7 +218,7 @@ export const approveBooking = (req: AuthRequest, res: Response) => {
             read: 0,
             createdAt: new Date().toISOString(),
         };
-        createNotification(notif);
+        await createNotification(notif);
 
         res.json({ message: 'Booking approved', booking: { ...booking, status: 'confirmed' } });
     } catch (error: any) {
@@ -229,8 +226,8 @@ export const approveBooking = (req: AuthRequest, res: Response) => {
     }
 };
 
-// PATCH /api/bookings/:id/reject — Reject a booking
-export const rejectBooking = (req: AuthRequest, res: Response) => {
+// PATCH /api/bookings/:id/reject
+export const rejectBooking = async (req: AuthRequest, res: Response) => {
     try {
         if (!req.user) {
             res.status(401).json({ message: 'Unauthorized' });
@@ -238,14 +235,14 @@ export const rejectBooking = (req: AuthRequest, res: Response) => {
         }
 
         const bookingId = req.params.id as string;
-        const booking = findBookingById(bookingId);
+        const booking = await findBookingById(bookingId);
 
         if (!booking) {
             res.status(404).json({ message: 'Booking not found' });
             return;
         }
 
-        const trip = findTripById(booking.tripId);
+        const trip = await findTripById(booking.tripId);
         if (!trip) {
             res.status(404).json({ message: 'Trip not found' });
             return;
@@ -261,9 +258,8 @@ export const rejectBooking = (req: AuthRequest, res: Response) => {
             return;
         }
 
-        updateBookingStatus(bookingId, 'rejected');
+        await updateBookingStatus(bookingId, 'rejected');
 
-        // Notify passenger
         const notif: Notification = {
             id: uuidv4(),
             userId: booking.passengerId,
@@ -275,7 +271,7 @@ export const rejectBooking = (req: AuthRequest, res: Response) => {
             read: 0,
             createdAt: new Date().toISOString(),
         };
-        createNotification(notif);
+        await createNotification(notif);
 
         res.json({ message: 'Booking rejected', booking: { ...booking, status: 'rejected' } });
     } catch (error: any) {

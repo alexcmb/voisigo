@@ -9,13 +9,13 @@ const updateProfileSchema = z.object({
     avatarUrl: z.string().optional(),
 });
 
-export const getProfile = (req: AuthRequest, res: Response) => {
+export const getProfile = async (req: AuthRequest, res: Response) => {
     if (!req.user) {
         res.status(401).json({ message: 'Unauthorized' });
         return;
     }
 
-    const user = findUserById(req.user.userId);
+    const user = await findUserById(req.user.userId);
     if (!user) {
         res.status(404).json({ message: 'User not found' });
         return;
@@ -24,7 +24,7 @@ export const getProfile = (req: AuthRequest, res: Response) => {
     res.json({ id: user.id, name: user.name, email: user.email, bio: user.bio, avatarUrl: user.avatarUrl });
 };
 
-export const updateProfile = (req: AuthRequest, res: Response) => {
+export const updateProfile = async (req: AuthRequest, res: Response) => {
     try {
         if (!req.user) {
             res.status(401).json({ message: 'Unauthorized' });
@@ -32,36 +32,36 @@ export const updateProfile = (req: AuthRequest, res: Response) => {
         }
 
         const data = updateProfileSchema.parse(req.body);
-        const user = findUserById(req.user.userId);
+        const user = await findUserById(req.user.userId);
         if (!user) {
             res.status(404).json({ message: 'User not found' });
             return;
         }
 
-        updateUser(req.user.userId, data);
+        await updateUser(req.user.userId, data);
 
-        const updated = findUserById(req.user.userId)!;
+        const updated = await findUserById(req.user.userId);
         res.json({
             message: 'Profile updated',
-            user: { id: updated.id, name: updated.name, email: updated.email, bio: updated.bio, avatarUrl: updated.avatarUrl },
+            user: { id: updated!.id, name: updated!.name, email: updated!.email, bio: updated!.bio, avatarUrl: updated!.avatarUrl },
         });
     } catch (error: any) {
         res.status(400).json({ message: error.message || 'Validation error' });
     }
 };
 
-// GET /api/users/:id/public — Public profile with reviews
-export const getPublicProfile = (req: AuthRequest, res: Response) => {
+// GET /api/users/:id/public
+export const getPublicProfile = async (req: AuthRequest, res: Response) => {
     const id = req.params.id as string;
-    const user = findUserById(id);
+    const user = await findUserById(id);
 
     if (!user) {
         res.status(404).json({ message: 'Utilisateur introuvable' });
         return;
     }
 
-    const reviews = getReviewsForUser(id);
-    const { avg, count } = getAverageRating(id);
+    const reviews = await getReviewsForUser(id);
+    const { avg, count } = await getAverageRating(id);
 
     res.json({
         user: {
