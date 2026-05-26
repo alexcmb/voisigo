@@ -96,6 +96,7 @@ export default function TripsList() {
     };
 
     return (
+        <>
         <Layout>
             <div className="p-4">
                 <div className="max-w-4xl mx-auto">
@@ -293,5 +294,6 @@ export default function TripsList() {
                 onClose={() => setMapTrip(null)}
             />
         )}
+        </>
     );
 }
