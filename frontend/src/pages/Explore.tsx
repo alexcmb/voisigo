@@ -424,7 +424,6 @@ export default function Explore() {
                                 } else {
                                     const isRequest = item.type === 'request';
                                     const colorClass = isRequest ? 'text-orange-600 bg-orange-50' : 'text-green-600 bg-green-50';
-                                    const accentBg = isRequest ? 'bg-orange-500' : 'bg-green-500';
                                     const icon = CATEGORY_EMOJIS[item.category] || '✨';
                                     const owner = isOwner(item);
 
