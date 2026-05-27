@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { API_BASE_URL } from '../../lib/api';
@@ -14,6 +14,11 @@ export default function TripsList() {
     const [mapTrip, setMapTrip] = useState<(Trip & { availableSeats?: number; driverRating?: { avg: number; count: number } | null }) | null>(null);
     const toast = useToast();
     const confirm = useConfirm();
+
+    // Search & filter state
+    const [searchDep, setSearchDep] = useState('');
+    const [searchDest, setSearchDest] = useState('');
+    const [futureOnly, setFutureOnly] = useState(true);
 
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
     const token = localStorage.getItem('token');
@@ -95,6 +100,21 @@ export default function TripsList() {
         }
     };
 
+    // Filtered trips (client-side)
+    const filteredTrips = useMemo(() => {
+        const now = new Date();
+        return trips.filter(trip => {
+            const dep = trip.departure.toLowerCase();
+            const dest = trip.destination.toLowerCase();
+            const depOk = !searchDep || dep.includes(searchDep.toLowerCase());
+            const destOk = !searchDest || dest.includes(searchDest.toLowerCase());
+            const futureOk = !futureOnly || new Date(trip.date) >= now;
+            return depOk && destOk && futureOk;
+        });
+    }, [trips, searchDep, searchDest, futureOnly]);
+
+    const hasSearch = searchDep || searchDest || futureOnly;
+
     return (
         <>
         <Layout>
@@ -110,22 +130,90 @@ export default function TripsList() {
                         </Link>
                     </div>
 
+                    {/* ── Search bar ── */}
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {/* Departure */}
+                            <div>
+                                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">📍 Départ</label>
+                                <input
+                                    type="text"
+                                    placeholder="Paris, Lyon..."
+                                    value={searchDep}
+                                    onChange={e => setSearchDep(e.target.value)}
+                                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
+                                />
+                            </div>
+
+                            {/* Destination */}
+                            <div>
+                                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">🏁 Arrivée</label>
+                                <input
+                                    type="text"
+                                    placeholder="Marseille, Bordeaux..."
+                                    value={searchDest}
+                                    onChange={e => setSearchDest(e.target.value)}
+                                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
+                                />
+                            </div>
+
+                            {/* Future only + reset */}
+                            <div className="flex items-end gap-3">
+                                <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none flex-1 pb-2.5">
+                                    <input
+                                        type="checkbox"
+                                        checked={futureOnly}
+                                        onChange={e => setFutureOnly(e.target.checked)}
+                                        className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-400 cursor-pointer"
+                                    />
+                                    Trajets à venir
+                                </label>
+                                {(searchDep || searchDest || !futureOnly) && (
+                                    <button
+                                        onClick={() => { setSearchDep(''); setSearchDest(''); setFutureOnly(true); }}
+                                        className="text-xs text-gray-400 hover:text-gray-600 pb-2.5 whitespace-nowrap"
+                                    >
+                                        ✕ Effacer
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Result count */}
+                        {hasSearch && !loading && (
+                            <p className="mt-2 text-xs text-gray-400">
+                                {filteredTrips.length === 0
+                                    ? 'Aucun trajet ne correspond à votre recherche'
+                                    : `${filteredTrips.length} trajet${filteredTrips.length > 1 ? 's' : ''} trouvé${filteredTrips.length > 1 ? 's' : ''}`
+                                }
+                            </p>
+                        )}
+                    </div>
+
+                    {/* ── Trip list ── */}
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-20 gap-4">
                             <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
                             <p className="text-gray-500 font-medium">Chargement des trajets...</p>
                         </div>
-                    ) : trips.length === 0 ? (
+
+                    ) : filteredTrips.length === 0 ? (
                         <div className="bg-white p-10 rounded-xl shadow text-center">
-                            <p className="text-4xl mb-3">🚗</p>
-                            <p className="text-xl text-gray-600 mb-4">Aucun trajet pour le moment.</p>
-                            <Link to="/trips/create" className="text-blue-600 font-bold hover:underline text-lg">
-                                Soyez le premier à en proposer un !
-                            </Link>
+                            <p className="text-4xl mb-3">{hasSearch ? '🔍' : '🚗'}</p>
+                            <p className="text-xl text-gray-600 mb-4">
+                                {hasSearch
+                                    ? 'Aucun trajet ne correspond à votre recherche.'
+                                    : 'Aucun trajet pour le moment.'}
+                            </p>
+                            {!hasSearch && (
+                                <Link to="/trips/create" className="text-blue-600 font-bold hover:underline text-lg">
+                                    Soyez le premier à en proposer un !
+                                </Link>
+                            )}
                         </div>
                     ) : (
                         <div className="grid gap-4">
-                            {trips.map(trip => {
+                            {filteredTrips.map(trip => {
                                 const isOwner = currentUser?.id && trip.driverId === currentUser.id;
                                 const myBooking = myBookingsMap[trip.id];
                                 const available = trip.availableSeats ?? trip.seats;
