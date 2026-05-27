@@ -347,11 +347,13 @@ export default function Explore() {
                                     const isPremium = item.driverIsPremium === true;
                                     const owner = isOwner(item);
                                     return (
-                                        <div key={item.id} className={`bg-white rounded-2xl shadow-sm border ${isPremium ? 'border-amber-200 dark:border-amber-950/30 shadow-[0_0_12px_rgba(245,158,11,0.08)] bg-gradient-to-br from-white to-amber-50/5' : 'border-slate-100'} hover:shadow-md transition-all relative overflow-hidden group`}>
-                                            <div className="absolute top-0 left-0 w-1 h-full bg-blue-500" />
-
+                                        <div key={item.id} className={`bg-white rounded-xl shadow-md border-l-4 border-blue-500 hover:shadow-lg transition-all relative overflow-hidden group ${
+                                            isPremium 
+                                                ? 'ring-1 ring-amber-400/30 dark:ring-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.12)] bg-gradient-to-br from-white via-white to-amber-50/5 dark:from-slate-800 dark:via-slate-800 dark:to-amber-950/10' 
+                                                : ''
+                                        }`}>
                                             {/* Clickable zone → trip detail */}
-                                            <Link to={`/trips/${item.id}`} className="block p-5 pb-3 pl-6">
+                                            <Link to={`/trips/${item.id}`} className="block p-5 pb-3 pl-5">
                                                 <div className="flex items-center justify-between mb-3">
                                                     <div className="flex items-center gap-3">
                                                         <div className="bg-blue-100 p-2 rounded-full text-xl leading-none">🚗</div>
@@ -382,7 +384,7 @@ export default function Explore() {
                                             </Link>
 
                                             {/* Action footer */}
-                                            <div className="px-5 pb-4 pt-2 border-t border-gray-50 ml-6 flex items-center justify-between gap-2 flex-wrap">
+                                            <div className="px-5 pb-4 pt-2 border-t border-slate-100 ml-6 flex items-center justify-between gap-2 flex-wrap">
                                                 {owner ? (
                                                     <button
                                                         onClick={() => handleDelete(item)}
@@ -428,11 +430,13 @@ export default function Explore() {
 
                                     const isPremium = item.authorIsPremium === true;
                                     return (
-                                        <div key={item.id} className={`bg-white rounded-2xl shadow-sm border ${isPremium ? 'border-amber-200 dark:border-amber-950/30 shadow-[0_0_12px_rgba(245,158,11,0.08)] bg-gradient-to-br from-white to-amber-50/5' : 'border-slate-100'} hover:shadow-md transition-all relative overflow-hidden group`}>
-                                            <div className={`absolute top-0 left-0 w-1 h-full ${accentBg}`} />
-
+                                        <div key={item.id} className={`bg-white rounded-xl shadow-md border-l-4 ${isRequest ? 'border-orange-400' : 'border-green-500'} hover:shadow-lg transition-all relative overflow-hidden group ${
+                                            isPremium 
+                                                ? 'ring-1 ring-amber-400/30 dark:ring-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.12)] bg-gradient-to-br from-white via-white to-amber-50/5 dark:from-slate-800 dark:via-slate-800 dark:to-amber-950/10' 
+                                                : ''
+                                        }`}>
                                             {/* Clickable zone → service detail */}
-                                            <Link to={`/services/${item.id}`} className="block p-5 pb-3 pl-6">
+                                            <Link to={`/services/${item.id}`} className="block p-5 pb-3 pl-5">
                                                 <div className="flex items-center justify-between mb-3">
                                                     <div className="flex items-center gap-3">
                                                         <div className={`p-2 rounded-full text-xl leading-none ${isRequest ? 'bg-orange-100' : 'bg-green-100'}`}>{icon}</div>
@@ -464,7 +468,7 @@ export default function Explore() {
                                             </Link>
 
                                             {/* Action footer */}
-                                            <div className="px-5 pb-4 pt-2 border-t border-gray-50 ml-6 flex items-center gap-2">
+                                            <div className="px-5 pb-4 pt-2 border-t border-slate-100 ml-6 flex items-center gap-2">
                                                 {owner ? (
                                                     <button
                                                         onClick={() => handleDelete(item)}
