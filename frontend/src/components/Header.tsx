@@ -209,12 +209,22 @@ export default function Header() {
                             </button>
 
                             <div className="flex items-center gap-3">
-                                <Link to="/profile">
+                                <Link to="/profile" className="relative group">
                                     {user.avatarUrl ? (
                                         <img src={user.avatarUrl} alt="Me" className="w-8 h-8 rounded-full border border-gray-200 dark:border-slate-700" />
                                     ) : (
                                         <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-950 flex items-center justify-center text-xs">👤</div>
                                     )}
+
+                                    {/* Overlay status badges */}
+                                    <div className="absolute -bottom-1 -right-1 flex gap-0.5 pointer-events-none">
+                                        {user.isPremium && (
+                                            <span className="w-4 h-4 bg-amber-500 text-white rounded-full flex items-center justify-center text-[10px] shadow-sm border border-white dark:border-slate-900" title="Premium">👑</span>
+                                        )}
+                                        {user.isVerified && (
+                                            <span className="w-4 h-4 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[10px] shadow-sm border border-white dark:border-slate-900" title="Profil vérifié">✓</span>
+                                        )}
+                                    </div>
                                 </Link>
                                 <button onClick={handleLogout} className="text-sm font-medium text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/30 px-2 py-1 rounded cursor-pointer">
                                     ✕

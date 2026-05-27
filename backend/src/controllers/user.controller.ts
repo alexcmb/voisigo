@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { findUserById, updateUser, getReviewsForUser, getAverageRating, getDashboardStats } from '../utils/db';
+import { findUserById, updateUser, getReviewsForUser, getAverageRating, getDashboardStats, upgradeUserToPremium, verifyUserIdentity } from '../utils/db';
 import { z } from 'zod';
 import { AuthRequest } from '../middleware/auth.middleware';
 
@@ -21,7 +21,7 @@ export const getProfile = async (req: AuthRequest, res: Response) => {
         return;
     }
 
-    res.json({ id: user.id, name: user.name, email: user.email, bio: user.bio, avatarUrl: user.avatarUrl });
+    res.json({ id: user.id, name: user.name, email: user.email, bio: user.bio, avatarUrl: user.avatarUrl, isPremium: user.isPremium, isVerified: user.isVerified });
 };
 
 export const updateProfile = async (req: AuthRequest, res: Response) => {
@@ -43,7 +43,7 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
         const updated = await findUserById(req.user.userId);
         res.json({
             message: 'Profile updated',
-            user: { id: updated!.id, name: updated!.name, email: updated!.email, bio: updated!.bio, avatarUrl: updated!.avatarUrl },
+            user: { id: updated!.id, name: updated!.name, email: updated!.email, bio: updated!.bio, avatarUrl: updated!.avatarUrl, isPremium: updated!.isPremium, isVerified: updated!.isVerified },
         });
     } catch (error: any) {
         res.status(400).json({ message: error.message || 'Validation error' });
@@ -70,6 +70,8 @@ export const getPublicProfile = async (req: AuthRequest, res: Response) => {
             bio: user.bio || '',
             avatarUrl: user.avatarUrl || '',
             createdAt: user.createdAt,
+            isPremium: user.isPremium,
+            isVerified: user.isVerified,
         },
         averageRating: Math.round(avg * 10) / 10,
         totalReviews: count,
@@ -86,6 +88,44 @@ export const getDashboardStatsController = async (req: AuthRequest, res: Respons
 
         const stats = await getDashboardStats(req.user.userId);
         res.json(stats);
+    } catch (error: any) {
+        res.status(500).json({ message: error.message || 'Internal server error' });
+    }
+};
+
+export const upgradeProfileToPremium = async (req: AuthRequest, res: Response) => {
+    try {
+        if (!req.user) {
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
+
+        await upgradeUserToPremium(req.user.userId, true);
+        const updated = await findUserById(req.user.userId);
+
+        res.json({
+            message: 'Félicitations, vous êtes Premium ! 👑',
+            user: { id: updated!.id, name: updated!.name, email: updated!.email, bio: updated!.bio, avatarUrl: updated!.avatarUrl, isPremium: updated!.isPremium, isVerified: updated!.isVerified },
+        });
+    } catch (error: any) {
+        res.status(500).json({ message: error.message || 'Internal server error' });
+    }
+};
+
+export const submitIdentityVerification = async (req: AuthRequest, res: Response) => {
+    try {
+        if (!req.user) {
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
+
+        await verifyUserIdentity(req.user.userId, true);
+        const updated = await findUserById(req.user.userId);
+
+        res.json({
+            message: 'Identité vérifiée avec succès ! ✅',
+            user: { id: updated!.id, name: updated!.name, email: updated!.email, bio: updated!.bio, avatarUrl: updated!.avatarUrl, isPremium: updated!.isPremium, isVerified: updated!.isVerified },
+        });
     } catch (error: any) {
         res.status(500).json({ message: error.message || 'Internal server error' });
     }

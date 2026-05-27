@@ -344,10 +344,10 @@ export default function Explore() {
                                 if (item.kind === 'trip') {
                                     const myBooking = myBookingsMap[item.id];
                                     const available = seatsMap[item.id] ?? item.seats;
+                                    const isPremium = item.driverIsPremium === true;
                                     const owner = isOwner(item);
-
                                     return (
-                                        <div key={item.id} className="bg-white rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow relative overflow-hidden group">
+                                        <div key={item.id} className={`bg-white rounded-2xl shadow-sm border ${isPremium ? 'border-amber-200 dark:border-amber-950/30 shadow-[0_0_12px_rgba(245,158,11,0.08)] bg-gradient-to-br from-white to-amber-50/5' : 'border-slate-100'} hover:shadow-md transition-all relative overflow-hidden group`}>
                                             <div className="absolute top-0 left-0 w-1 h-full bg-blue-500" />
 
                                             {/* Clickable zone → trip detail */}
@@ -357,7 +357,15 @@ export default function Explore() {
                                                         <div className="bg-blue-100 p-2 rounded-full text-xl leading-none">🚗</div>
                                                         <div>
                                                             <span className="text-xs font-bold text-blue-600 uppercase tracking-wide">Covoiturage</span>
-                                                            <div className="text-sm text-gray-500">Proposé par <span className="font-medium text-gray-800">{item.driverName}</span></div>
+                                                            <div className="text-sm text-gray-500 flex items-center gap-1 flex-wrap">
+                                                                Proposé par <span className="font-medium text-gray-800">{item.driverName}</span>
+                                                                {item.driverIsPremium && (
+                                                                    <span className="text-xs leading-none" title="Premium 👑">👑</span>
+                                                                )}
+                                                                {item.driverIsVerified && (
+                                                                    <span className="text-emerald-500 text-xs font-bold" title="Profil vérifié ✅">✓</span>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <span className="text-xl font-bold text-blue-600">{item.price === 0 ? 'Gratuit' : `${item.price} €`}</span>
@@ -418,8 +426,9 @@ export default function Explore() {
                                     const icon = CATEGORY_EMOJIS[item.category] || '✨';
                                     const owner = isOwner(item);
 
+                                    const isPremium = item.authorIsPremium === true;
                                     return (
-                                        <div key={item.id} className="bg-white rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow relative overflow-hidden group">
+                                        <div key={item.id} className={`bg-white rounded-2xl shadow-sm border ${isPremium ? 'border-amber-200 dark:border-amber-950/30 shadow-[0_0_12px_rgba(245,158,11,0.08)] bg-gradient-to-br from-white to-amber-50/5' : 'border-slate-100'} hover:shadow-md transition-all relative overflow-hidden group`}>
                                             <div className={`absolute top-0 left-0 w-1 h-full ${accentBg}`} />
 
                                             {/* Clickable zone → service detail */}
@@ -431,7 +440,15 @@ export default function Explore() {
                                                             <span className={`text-xs font-bold uppercase tracking-wide ${isRequest ? 'text-orange-600' : 'text-green-600'}`}>
                                                                 {isRequest ? "Demande d'aide" : "Offre d'aide"}
                                                             </span>
-                                                            <div className="text-sm text-gray-500">Par <span className="font-medium text-gray-800">{item.authorName}</span></div>
+                                                            <div className="text-sm text-gray-500 flex items-center gap-1 flex-wrap">
+                                                                Par <span className="font-medium text-gray-800">{item.authorName}</span>
+                                                                {item.authorIsPremium && (
+                                                                    <span className="text-xs leading-none" title="Premium 👑">👑</span>
+                                                                )}
+                                                                {item.authorIsVerified && (
+                                                                    <span className="text-emerald-500 text-xs font-bold" title="Profil vérifié ✅">✓</span>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <span className={`font-bold text-base ${isRequest ? 'text-orange-600' : 'text-green-600'}`}>

@@ -13,6 +13,8 @@ interface PublicUser {
     bio: string;
     avatarUrl: string;
     createdAt: string;
+    isPremium?: boolean;
+    isVerified?: boolean;
 }
 
 export default function PublicProfile() {
@@ -150,7 +152,19 @@ export default function PublicProfile() {
                             </div>
 
                             {/* Name & bio */}
-                            <h1 className="text-2xl font-bold text-gray-900 mb-1">{user.name}</h1>
+                            <div className="flex flex-wrap items-center gap-2 mb-2">
+                                <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
+                                {user.isPremium && (
+                                    <span className="inline-flex items-center justify-center bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full text-xs font-bold border border-amber-200/50 dark:border-amber-800/30 gap-1" title="Membre Premium">
+                                        👑 Premium
+                                    </span>
+                                )}
+                                {user.isVerified && (
+                                    <span className="inline-flex items-center justify-center bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full text-xs font-bold border border-emerald-200/50 dark:border-emerald-800/30 gap-0.5" title="Identité vérifiée">
+                                        ✅ Vérifié
+                                    </span>
+                                )}
+                            </div>
                             <p className="text-sm text-gray-400 mb-3">Membre depuis {memberSince(user.createdAt)}</p>
                             {user.bio ? (
                                 <p className="text-gray-600 leading-relaxed">{user.bio}</p>

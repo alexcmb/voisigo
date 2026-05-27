@@ -4,6 +4,8 @@ export interface User {
     email: string;
     bio?: string;
     avatarUrl?: string;
+    isPremium?: boolean;
+    isVerified?: boolean;
 }
 
 export interface Trip {
@@ -26,6 +28,8 @@ export interface Trip {
     availableSeats?: number;
     driverRating?: { avg: number; count: number } | null;
     pendingBookingsCount?: number;
+    driverIsPremium?: boolean;
+    driverIsVerified?: boolean;
 }
 
 export interface Service {
@@ -42,6 +46,8 @@ export interface Service {
     price?: number;
     date: string;
     createdAt: string;
+    authorIsPremium?: boolean;
+    authorIsVerified?: boolean;
 }
 
 export type ServiceCategory = Service['category'];

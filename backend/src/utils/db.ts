@@ -9,6 +9,8 @@ export interface User {
     bio?: string;
     avatarUrl?: string;
     createdAt: string;
+    isPremium?: boolean;
+    isVerified?: boolean;
 }
 
 export interface Trip {
@@ -141,9 +143,19 @@ export const initDb = async (): Promise<void> => {
                 name TEXT NOT NULL,
                 bio TEXT DEFAULT '',
                 "avatarUrl" TEXT DEFAULT '',
-                "createdAt" TEXT NOT NULL
+                "createdAt" TEXT NOT NULL,
+                "isPremium" BOOLEAN DEFAULT FALSE,
+                "isVerified" BOOLEAN DEFAULT FALSE
             )
         `);
+
+        // Migration pour les tables existantes
+        try {
+            await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS "isPremium" BOOLEAN DEFAULT FALSE');
+            await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS "isVerified" BOOLEAN DEFAULT FALSE');
+        } catch (e) {
+            console.log('Columns isPremium/isVerified already exist or alteration failed:', e);
+        }
 
         await client.query(`
             CREATE TABLE IF NOT EXISTS trips (
@@ -373,13 +385,13 @@ export const getServices = async (page = 1, limit = 20, authorId?: string): Prom
 
     if (authorId) {
         services = await rows<Service>(
-            'SELECT * FROM services WHERE "authorId" = $1 ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3',
+            'SELECT s.*, u."isPremium" AS "authorIsPremium", u."isVerified" AS "authorIsVerified" FROM services s LEFT JOIN users u ON s."authorId" = u.id WHERE s."authorId" = $1 ORDER BY s."createdAt" DESC LIMIT $2 OFFSET $3',
             [authorId, limit, offset]
         );
         const r = await row<{ count: string }>('SELECT COUNT(*)::TEXT as count FROM services WHERE "authorId" = $1', [authorId]);
         totalStr = r?.count;
     } else {
-        services = await rows<Service>('SELECT * FROM services ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2', [limit, offset]);
+        services = await rows<Service>('SELECT s.*, u."isPremium" AS "authorIsPremium", u."isVerified" AS "authorIsVerified" FROM services s LEFT JOIN users u ON s."authorId" = u.id ORDER BY s."createdAt" DESC LIMIT $1 OFFSET $2', [limit, offset]);
         const r = await row<{ count: string }>('SELECT COUNT(*)::TEXT as count FROM services');
         totalStr = r?.count;
     }
@@ -388,7 +400,7 @@ export const getServices = async (page = 1, limit = 20, authorId?: string): Prom
 };
 
 export const findServiceById = (id: string): Promise<Service | undefined> =>
-    row<Service>('SELECT * FROM services WHERE id = $1', [id]);
+    row<Service>('SELECT s.*, u."isPremium" AS "authorIsPremium", u."isVerified" AS "authorIsVerified" FROM services s LEFT JOIN users u ON s."authorId" = u.id WHERE s.id = $1', [id]);
 
 export const createService = async (service: Service): Promise<void> => {
     await exec(
@@ -690,11 +702,15 @@ export interface TripEnriched extends Trip {
     driverRatingAvg: number | null;
     driverRatingCount: number;
     pendingBookingsCount: number;
+    driverIsPremium?: boolean;
+    driverIsVerified?: boolean;
 }
 
 const ENRICHED_SQL = `
     SELECT
         t.*,
+        u."isPremium" AS "driverIsPremium",
+        u."isVerified" AS "driverIsVerified",
         (t.seats - COALESCE((
             SELECT SUM(b.seats) FROM bookings b
             WHERE b."tripId" = t.id AND b.status = 'confirmed'
@@ -703,6 +719,7 @@ const ENRICHED_SQL = `
         (SELECT COUNT(*)::INTEGER FROM reviews r WHERE r."targetUserId" = t."driverId") AS "driverRatingCount",
         (SELECT COUNT(*)::INTEGER FROM bookings b WHERE b."tripId" = t.id AND b.status = 'pending') AS "pendingBookingsCount"
     FROM trips t
+    LEFT JOIN users u ON t."driverId" = u.id
 `;
 
 export const getTripsEnriched = async (page = 1, limit = 20, driverId?: string): Promise<{ trips: TripEnriched[]; total: number }> => {
@@ -751,4 +768,12 @@ export const getDashboardStats = async (userId: string): Promise<{
         avgRating: Math.round(rating.avg * 10) / 10,
         reviewsCount: rating.count,
     };
+};
+
+export const upgradeUserToPremium = async (userId: string, isPremium = true): Promise<void> => {
+    await exec('UPDATE users SET "isPremium" = $1 WHERE id = $2', [isPremium, userId]);
+};
+
+export const verifyUserIdentity = async (userId: string, isVerified = true): Promise<void> => {
+    await exec('UPDATE users SET "isVerified" = $1 WHERE id = $2', [isVerified, userId]);
 };

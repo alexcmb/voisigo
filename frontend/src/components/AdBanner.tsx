@@ -9,6 +9,9 @@ interface AdBannerProps {
 }
 
 export default function AdBanner({ format = 'banner', className = '', imageSrc, adId }: AdBannerProps) {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const isPremium = user?.isPremium === true;
+
     const storageKey = adId ? `ad_hidden_${adId}` : null;
     const [hidden, setHidden] = useState(() => {
         if (!storageKey) return false;
@@ -20,7 +23,7 @@ export default function AdBanner({ format = 'banner', className = '', imageSrc, 
         if (storageKey) localStorage.setItem(storageKey, '1');
     };
 
-    if (hidden) return null;
+    if (isPremium || hidden) return null;
 
     const closeBtn = (
         <button
