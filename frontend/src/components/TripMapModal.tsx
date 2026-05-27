@@ -103,7 +103,7 @@ export default function TripMapModal({ trip, onClose }: TripMapModalProps) {
                             destinationLon={trip.destinationLon!}
                             departure={trip.departure}
                             destination={trip.destination}
-                            height="100%"
+                            height="320px"
                         />
                     ) : (
                         <div className="flex items-center justify-center h-full bg-gray-50 text-gray-400 text-sm">
