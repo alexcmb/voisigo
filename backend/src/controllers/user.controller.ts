@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { findUserById, updateUser, getReviewsForUser, getAverageRating } from '../utils/db';
+import { findUserById, updateUser, getReviewsForUser, getAverageRating, getDashboardStats } from '../utils/db';
 import { z } from 'zod';
 import { AuthRequest } from '../middleware/auth.middleware';
 
@@ -75,4 +75,18 @@ export const getPublicProfile = async (req: AuthRequest, res: Response) => {
         totalReviews: count,
         reviews,
     });
+};
+
+export const getDashboardStatsController = async (req: AuthRequest, res: Response) => {
+    try {
+        if (!req.user) {
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
+
+        const stats = await getDashboardStats(req.user.userId);
+        res.json(stats);
+    } catch (error: any) {
+        res.status(500).json({ message: error.message || 'Internal server error' });
+    }
 };

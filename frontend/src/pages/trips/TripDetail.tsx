@@ -258,10 +258,37 @@ export default function TripDetail() {
             <div className="p-4 pb-12">
                 <div className="max-w-3xl mx-auto">
 
-                    {/* Back link */}
-                    <Link to="/trips" className="inline-flex items-center gap-2 text-gray-500 hover:text-blue-600 transition-colors mb-6 font-medium">
-                        ← Retour aux trajets
-                    </Link>
+                    {/* Back link & Share buttons */}
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
+                        <Link to="/trips" className="inline-flex items-center gap-2 text-gray-500 hover:text-blue-600 transition-colors font-medium">
+                            ← Retour aux trajets
+                        </Link>
+                        
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                            <span className="text-xs text-gray-400 font-semibold uppercase tracking-wide mr-1">Partager :</span>
+                            <a
+                                href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
+                                    `Salut ! 🚗 Je te partage ce trajet de ${trip.departure} à ${trip.destination} prévu le ${new Date(trip.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}. Regarde sur VoisiGO ! ${window.location.href}`
+                                )}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 rounded-xl transition-all flex items-center justify-center text-xs font-bold shadow-sm border border-emerald-200/50 dark:border-emerald-800/30"
+                                title="Partager sur WhatsApp"
+                            >
+                                💬 WhatsApp
+                            </a>
+                            <button
+                                onClick={() => {
+                                    navigator.clipboard.writeText(window.location.href);
+                                    toast.success('Lien du trajet copié !');
+                                }}
+                                className="px-3 py-1.5 bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-xl transition-all flex items-center justify-center text-xs font-bold shadow-sm border border-blue-200/50 dark:border-blue-800/30 cursor-pointer"
+                                title="Copier le lien"
+                            >
+                                🔗 Copier
+                            </button>
+                        </div>
+                    </div>
 
                     {/* Trip header card */}
                     <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">

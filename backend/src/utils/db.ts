@@ -731,3 +731,24 @@ export const getTripsEnriched = async (page = 1, limit = 20, driverId?: string):
 
 export const findTripEnrichedById = (id: string): Promise<TripEnriched | undefined> =>
     row<TripEnriched>(`${ENRICHED_SQL} WHERE t.id = $1`, [id]);
+
+export const getDashboardStats = async (userId: string): Promise<{
+    tripsCount: number;
+    servicesCount: number;
+    bookingsCount: number;
+    avgRating: number;
+    reviewsCount: number;
+}> => {
+    const trips = await row<{ count: string }>('SELECT COUNT(*) as count FROM trips WHERE "driverId" = $1', [userId]);
+    const services = await row<{ count: string }>('SELECT COUNT(*) as count FROM services WHERE "authorId" = $1', [userId]);
+    const bookings = await row<{ count: string }>('SELECT COUNT(*) as count FROM bookings WHERE "passengerId" = $1', [userId]);
+    const rating = await getAverageRating(userId);
+
+    return {
+        tripsCount: parseInt(trips?.count || '0', 10),
+        servicesCount: parseInt(services?.count || '0', 10),
+        bookingsCount: parseInt(bookings?.count || '0', 10),
+        avgRating: Math.round(rating.avg * 10) / 10,
+        reviewsCount: rating.count,
+    };
+};

@@ -16,6 +16,7 @@ import Messages from './pages/messages/Messages';
 import ConversationView from './pages/messages/ConversationView';
 import ProtectedRoute from './components/ProtectedRoute';
 import MyListings from './pages/MyListings';
+import NotFound from './pages/NotFound';
 import { UIProvider } from './context/UIContext';
 import { ThemeProvider } from './context/ThemeContext';
 
@@ -41,6 +42,7 @@ function App() {
           <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
           <Route path="/messages/:id" element={<ProtectedRoute><ConversationView /></ProtectedRoute>} />
           <Route path="/my-listings" element={<ProtectedRoute><MyListings /></ProtectedRoute>} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </UIProvider>
       </ThemeProvider>

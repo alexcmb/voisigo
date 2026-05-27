@@ -1,9 +1,35 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 import AdBanner from '../components/AdBanner';
+import { API_BASE_URL } from '../lib/api';
+
+interface DashboardStats {
+    tripsCount: number;
+    servicesCount: number;
+    bookingsCount: number;
+    avgRating: number;
+    reviewsCount: number;
+}
 
 export default function Dashboard() {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const token = localStorage.getItem('token');
+    const [stats, setStats] = useState<DashboardStats | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (!token) return;
+        fetch(`${API_BASE_URL}/api/users/dashboard-stats`, {
+            headers: { 'Authorization': `Bearer ${token}` },
+        })
+            .then(res => res.json())
+            .then(data => {
+                setStats(data);
+                setLoading(false);
+            })
+            .catch(() => setLoading(false));
+    }, [token]);
 
     return (
         <Layout>
@@ -25,6 +51,39 @@ export default function Dashboard() {
                             </div>
                         </div>
                     </div>
+
+                    {/* Stats Dashboard Grid */}
+                    {!loading && stats && (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                            <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col items-center text-center">
+                                <span className="text-3xl mb-2">🚗</span>
+                                <span className="text-2xl font-black text-blue-600">{stats.tripsCount}</span>
+                                <span className="text-xs text-gray-400 font-semibold uppercase tracking-wider mt-1">Trajets proposés</span>
+                            </div>
+
+                            <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col items-center text-center">
+                                <span className="text-3xl mb-2">🤝</span>
+                                <span className="text-2xl font-black text-purple-600">{stats.servicesCount}</span>
+                                <span className="text-xs text-gray-400 font-semibold uppercase tracking-wider mt-1">Services rendus</span>
+                            </div>
+
+                            <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col items-center text-center">
+                                <span className="text-3xl mb-2">🎫</span>
+                                <span className="text-2xl font-black text-orange-600">{stats.bookingsCount}</span>
+                                <span className="text-xs text-gray-400 font-semibold uppercase tracking-wider mt-1">Réservations</span>
+                            </div>
+
+                            <Link to="/profile" className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col items-center text-center hover:shadow-md transition-shadow">
+                                <span className="text-3xl mb-2">⭐</span>
+                                <span className="text-2xl font-black text-yellow-500">
+                                    {stats.reviewsCount > 0 ? stats.avgRating.toFixed(1) : '—'}
+                                </span>
+                                <span className="text-xs text-gray-400 font-semibold uppercase tracking-wider mt-1">
+                                    {stats.reviewsCount > 0 ? `${stats.reviewsCount} avis reçu${stats.reviewsCount !== 1 ? 's' : ''}` : 'Aucun avis'}
+                                </span>
+                            </Link>
+                        </div>
+                    )}
 
                     {/* Explore Banner */}
                     <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 mb-8 text-white shadow-lg transform hover:scale-[1.01] transition-transform">
