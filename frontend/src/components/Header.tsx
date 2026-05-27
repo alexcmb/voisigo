@@ -2,9 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../lib/api';
 import type { AppNotification } from '../types';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Header() {
     const navigate = useNavigate();
+    const { theme, toggleTheme } = useTheme();
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const [unreadCount, setUnreadCount] = useState(0);
@@ -131,24 +133,24 @@ export default function Header() {
                 {/* Logo */}
                 <Link
                     to={token ? '/dashboard' : '/'}
-                    className="text-2xl font-bold tracking-tight text-slate-800 hover:opacity-80 transition-opacity"
+                    className="text-2xl font-bold tracking-tight text-slate-800 dark:text-slate-100 hover:opacity-80 transition-opacity"
                 >
                     Voisi<span className="text-primary-600">Go</span>
                 </Link>
 
                 {/* ── Desktop nav ── */}
                 <div className="hidden md:flex gap-4 items-center">
-                    <Link to="/explore" className="font-medium text-gray-600 hover:text-blue-600 transition-colors">Explorer</Link>
+                    <Link to="/explore" className="font-medium text-gray-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Explorer</Link>
 
                     {token ? (
                         <>
-                            <Link to="/messages" className="font-medium text-gray-600 hover:text-blue-600 transition-colors" title="Messages">💬</Link>
+                            <Link to="/messages" className="font-medium text-gray-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" title="Messages">💬</Link>
 
                             {/* Notification bell */}
                             <div className="relative" ref={dropdownRef}>
                                 <button
                                     onClick={() => setShowNotifs(!showNotifs)}
-                                    className="font-medium text-gray-600 hover:text-blue-600 transition-colors relative"
+                                    className="font-medium text-gray-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors relative cursor-pointer"
                                     title="Notifications"
                                 >
                                     🔔
@@ -160,30 +162,30 @@ export default function Header() {
                                 </button>
 
                                 {showNotifs && (
-                                    <div className="absolute right-0 top-8 w-80 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden">
-                                        <div className="flex justify-between items-center px-4 py-3 border-b border-gray-100">
-                                            <span className="font-bold text-gray-800">Notifications</span>
+                                    <div className="absolute right-0 top-8 w-80 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-gray-100 dark:border-slate-700 z-50 overflow-hidden">
+                                        <div className="flex justify-between items-center px-4 py-3 border-b border-gray-100 dark:border-slate-700">
+                                            <span className="font-bold text-gray-800 dark:text-slate-100">Notifications</span>
                                             {unreadCount > 0 && (
-                                                <button onClick={markAllRead} className="text-xs text-blue-600 hover:underline">
+                                                <button onClick={markAllRead} className="text-xs text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">
                                                     Tout marquer lu
                                                 </button>
                                             )}
                                         </div>
                                         <div className="max-h-80 overflow-y-auto">
                                             {notifications.length === 0 ? (
-                                                <div className="p-6 text-center text-gray-400 text-sm">Aucune notification</div>
+                                                <div className="p-6 text-center text-gray-400 dark:text-slate-500 text-sm">Aucune notification</div>
                                             ) : (
                                                 notifications.map(notif => (
                                                     <button
                                                         key={notif.id}
                                                         onClick={() => handleNotifClick(notif)}
-                                                        className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-50 flex gap-3 items-start ${!notif.read ? 'bg-blue-50/50' : ''}`}
+                                                        className={`w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors border-b border-gray-50 dark:border-slate-700/50 flex gap-3 items-start cursor-pointer ${!notif.read ? 'bg-blue-50/50 dark:bg-blue-950/20' : ''}`}
                                                     >
                                                         <span className="text-lg mt-0.5">{notifIcon(notif.type)}</span>
                                                         <div className="flex-1 min-w-0">
-                                                            <div className="text-sm font-medium text-gray-800 truncate">{notif.title}</div>
-                                                            <div className="text-xs text-gray-500 truncate">{notif.message}</div>
-                                                            <div className="text-[10px] text-gray-400 mt-0.5">{timeAgo(notif.createdAt)}</div>
+                                                            <div className="text-sm font-medium text-gray-800 dark:text-slate-200 truncate">{notif.title}</div>
+                                                            <div className="text-xs text-gray-500 dark:text-slate-400 truncate">{notif.message}</div>
+                                                            <div className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5">{timeAgo(notif.createdAt)}</div>
                                                         </div>
                                                         {!notif.read && <span className="w-2 h-2 rounded-full bg-blue-500 mt-2 flex-shrink-0" />}
                                                     </button>
@@ -194,34 +196,63 @@ export default function Header() {
                                 )}
                             </div>
 
-                            <Link to="/dashboard" className="font-medium text-gray-600 hover:text-blue-600 transition-colors">Tableau de bord</Link>
-                            <div className="h-6 w-px bg-gray-300 mx-1" />
+                            <Link to="/dashboard" className="font-medium text-gray-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Tableau de bord</Link>
+                            <div className="h-6 w-px bg-gray-300 dark:bg-slate-700 mx-1" />
+                            
+                            {/* Theme Toggle (Desktop) */}
+                            <button
+                                onClick={toggleTheme}
+                                className="p-1.5 rounded-lg bg-gray-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors flex items-center justify-center text-sm border border-gray-200/50 dark:border-slate-700/50 cursor-pointer"
+                                title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
+                            >
+                                {theme === 'dark' ? '☀️' : '🌙'}
+                            </button>
+
                             <div className="flex items-center gap-3">
                                 <Link to="/profile">
                                     {user.avatarUrl ? (
-                                        <img src={user.avatarUrl} alt="Me" className="w-8 h-8 rounded-full border border-gray-200" />
+                                        <img src={user.avatarUrl} alt="Me" className="w-8 h-8 rounded-full border border-gray-200 dark:border-slate-700" />
                                     ) : (
-                                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-xs">👤</div>
+                                        <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-950 flex items-center justify-center text-xs">👤</div>
                                     )}
                                 </Link>
-                                <button onClick={handleLogout} className="text-sm font-medium text-red-500 hover:text-red-700 transition-colors hover:bg-red-50 px-2 py-1 rounded">
+                                <button onClick={handleLogout} className="text-sm font-medium text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/30 px-2 py-1 rounded cursor-pointer">
                                     ✕
                                 </button>
                             </div>
                         </>
                     ) : (
                         <>
-                            <div className="h-6 w-px bg-gray-300 mx-1" />
-                            <Link to="/login" className="font-medium text-gray-600 hover:text-blue-600 transition-colors">Connexion</Link>
-                            <Link to="/register" className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-blue-700 transition-colors">
+                            <div className="h-6 w-px bg-gray-300 dark:bg-slate-700 mx-1" />
+                            
+                            {/* Theme Toggle (Desktop - Non connecté) */}
+                            <button
+                                onClick={toggleTheme}
+                                className="p-1.5 rounded-lg bg-gray-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors flex items-center justify-center text-sm border border-gray-200/50 dark:border-slate-700/50 cursor-pointer mr-1"
+                                title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
+                            >
+                                {theme === 'dark' ? '☀️' : '🌙'}
+                            </button>
+
+                            <Link to="/login" className="font-medium text-gray-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Connexion</Link>
+                            <Link to="/register" className="bg-blue-600 dark:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors">
                                 S'inscrire
                             </Link>
                         </>
                     )}
                 </div>
 
-                {/* ── Mobile: notif badge + hamburger ── */}
+                {/* ── Mobile: notif badge + theme toggle + hamburger ── */}
                 <div className="flex md:hidden items-center gap-3">
+                    {/* Theme Toggle (Mobile) */}
+                    <button
+                        onClick={toggleTheme}
+                        className="p-1.5 rounded-lg bg-gray-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors flex items-center justify-center text-sm border border-gray-200/50 dark:border-slate-700/50 cursor-pointer"
+                        title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
+                    >
+                        {theme === 'dark' ? '☀️' : '🌙'}
+                    </button>
+
                     {token && unreadCount > 0 && (
                         <Link to="/dashboard" className="relative">
                             <span className="text-lg">🔔</span>
@@ -234,11 +265,11 @@ export default function Header() {
                     <button
                         onClick={() => setMobileOpen(o => !o)}
                         aria-label={mobileOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
-                        className="flex flex-col justify-center items-center w-10 h-10 rounded-xl hover:bg-gray-100 transition-colors gap-1.5"
+                        className="flex flex-col justify-center items-center w-10 h-10 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors gap-1.5 cursor-pointer"
                     >
-                        <span className={`block w-5 h-0.5 bg-gray-700 rounded transition-all duration-300 ${mobileOpen ? 'translate-y-2 rotate-45' : ''}`} />
-                        <span className={`block w-5 h-0.5 bg-gray-700 rounded transition-all duration-300 ${mobileOpen ? 'opacity-0 scale-x-0' : ''}`} />
-                        <span className={`block w-5 h-0.5 bg-gray-700 rounded transition-all duration-300 ${mobileOpen ? '-translate-y-2 -rotate-45' : ''}`} />
+                        <span className={`block w-5 h-0.5 bg-gray-700 dark:bg-slate-300 rounded transition-all duration-300 ${mobileOpen ? 'translate-y-2 rotate-45' : ''}`} />
+                        <span className={`block w-5 h-0.5 bg-gray-700 dark:bg-slate-300 rounded transition-all duration-300 ${mobileOpen ? 'opacity-0 scale-x-0' : ''}`} />
+                        <span className={`block w-5 h-0.5 bg-gray-700 dark:bg-slate-300 rounded transition-all duration-300 ${mobileOpen ? '-translate-y-2 -rotate-45' : ''}`} />
                     </button>
                 </div>
             </div>
@@ -247,50 +278,49 @@ export default function Header() {
             {mobileOpen && (
                 <div className="md:hidden fixed inset-0 z-40 flex flex-col" style={{ top: 64 }}>
                     {/* Menu panel */}
-                    <div className="bg-white border-b border-gray-100 shadow-xl px-6 py-5 flex flex-col gap-1 animate-slideDown">
+                    <div className="bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 shadow-xl px-6 py-5 flex flex-col gap-1 animate-slideDown">
                         <Link to="/explore" onClick={closeMobile}
-                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 font-medium hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-slate-300 font-medium hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-700 dark:hover:text-blue-400 transition-colors">
                             🔍 <span>Explorer</span>
                         </Link>
 
                         {token ? (
                             <>
                                 <Link to="/dashboard" onClick={closeMobile}
-                                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 font-medium hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-slate-300 font-medium hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-700 dark:hover:text-blue-400 transition-colors">
                                     🏠 <span>Tableau de bord</span>
                                 </Link>
                                 <Link to="/trips" onClick={closeMobile}
-                                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 font-medium hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-slate-300 font-medium hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-700 dark:hover:text-blue-400 transition-colors">
                                     🚗 <span>Covoiturage</span>
                                 </Link>
                                 <Link to="/services" onClick={closeMobile}
-                                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 font-medium hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-slate-300 font-medium hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-700 dark:hover:text-blue-400 transition-colors">
                                     🤝 <span>Services</span>
                                 </Link>
                                 <Link to="/messages" onClick={closeMobile}
-                                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 font-medium hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-slate-300 font-medium hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-700 dark:hover:text-blue-400 transition-colors">
                                     💬 <span>Messages</span>
-                                    {/* TODO: unread message badge */}
                                 </Link>
                                 <Link to="/profile" onClick={closeMobile}
-                                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 font-medium hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-slate-300 font-medium hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-700 dark:hover:text-blue-400 transition-colors">
                                     👤 <span>Mon profil</span>
                                 </Link>
-                                <div className="border-t border-gray-100 my-1" />
+                                <div className="border-t border-gray-100 dark:border-slate-800 my-1" />
                                 <button onClick={handleLogout}
-                                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 font-medium hover:bg-red-50 transition-colors w-full text-left">
+                                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 dark:text-red-400 font-medium hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors w-full text-left cursor-pointer">
                                     🚪 <span>Déconnexion</span>
                                 </button>
                             </>
                         ) : (
                             <>
-                                <div className="border-t border-gray-100 my-1" />
+                                <div className="border-t border-gray-100 dark:border-slate-800 my-1" />
                                 <Link to="/login" onClick={closeMobile}
-                                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 font-medium hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-slate-300 font-medium hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-700 dark:hover:text-blue-400 transition-colors">
                                     🔑 <span>Connexion</span>
                                 </Link>
                                 <Link to="/register" onClick={closeMobile}
-                                    className="flex items-center justify-center gap-2 mx-4 py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors">
+                                    className="flex items-center justify-center gap-2 mx-4 py-3 rounded-xl bg-blue-600 dark:bg-blue-700 text-white font-bold hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors">
                                     ✨ S'inscrire
                                 </Link>
                             </>

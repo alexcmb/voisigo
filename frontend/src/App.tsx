@@ -17,11 +17,13 @@ import ConversationView from './pages/messages/ConversationView';
 import ProtectedRoute from './components/ProtectedRoute';
 import MyListings from './pages/MyListings';
 import { UIProvider } from './context/UIContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 function App() {
   return (
     <BrowserRouter>
-      <UIProvider>
+      <ThemeProvider>
+        <UIProvider>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/explore" element={<Explore />} />
@@ -41,6 +43,7 @@ function App() {
           <Route path="/my-listings" element={<ProtectedRoute><MyListings /></ProtectedRoute>} />
         </Routes>
       </UIProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }
