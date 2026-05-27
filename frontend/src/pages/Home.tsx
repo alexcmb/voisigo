@@ -18,7 +18,7 @@ export default function Home() {
                 </div>
                 <div className="flex gap-4 items-center flex-wrap">
                     <Link to="/explore" className="text-slate-600 font-bold hover:text-primary-600 transition-colors">Explorer</Link>
-                    <Link to="/premium" className="text-amber-600 dark:text-amber-500 font-bold hover:text-amber-700 transition-colors flex items-center gap-1">👑 Premium & Sécurité</Link>
+                    <Link to="/premium" className="text-amber-600 dark:text-amber-500 font-bold hover:text-amber-700 transition-colors flex items-center gap-1">👑 Premium</Link>
                     <div className="w-px h-6 bg-gray-300 mx-2"></div>
                     {localStorage.getItem('token') ? (
                         <Link to="/dashboard" className="bg-blue-600 text-white px-5 py-2 rounded-full font-bold shadow hover:bg-blue-700 transition-colors">

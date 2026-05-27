@@ -141,7 +141,7 @@ export default function Header() {
                 {/* ── Desktop nav ── */}
                 <div className="hidden md:flex gap-4 items-center">
                     <Link to="/explore" className="font-medium text-gray-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Explorer</Link>
-                    <Link to="/premium" className="font-medium text-amber-600 dark:text-amber-500 hover:text-amber-700 transition-colors flex items-center gap-1">👑 Premium & Sécurité</Link>
+                    <Link to="/premium" className="font-medium text-amber-600 dark:text-amber-500 hover:text-amber-700 transition-colors flex items-center gap-1">👑 Premium</Link>
 
                     {token ? (
                         <>
@@ -289,22 +289,40 @@ export default function Header() {
             {mobileOpen && (
                 <div className="md:hidden fixed inset-0 z-40 flex flex-col" style={{ top: 64 }}>
                     {/* Menu panel */}
-                    <div className="bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 shadow-xl px-6 py-5 flex flex-col gap-1 animate-slideDown">
-                        <Link to="/explore" onClick={closeMobile}
-                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-slate-300 font-medium hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-700 dark:hover:text-blue-400 transition-colors">
-                            🔍 <span>Explorer</span>
-                        </Link>
-                        <Link to="/premium" onClick={closeMobile}
-                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-slate-300 font-medium hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-700 dark:hover:text-blue-400 transition-colors">
-                            👑 <span>Premium & Sécurité</span>
-                        </Link>
+                    <div className="bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 shadow-xl px-6 py-5 flex flex-col gap-2.5 animate-slideDown">
+                        {/* Native-like Quick Access Grid */}
+                        <div className="grid grid-cols-3 gap-3 mb-2">
+                            <Link 
+                                to="/explore" 
+                                onClick={closeMobile} 
+                                className="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-blue-50 dark:bg-slate-800/80 hover:bg-blue-100 dark:hover:bg-slate-700/50 border border-blue-100/50 dark:border-slate-700/30 transition-all text-center group"
+                            >
+                                <span className="text-2xl mb-1.5 transition-transform group-hover:scale-110">🔍</span>
+                                <span className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase tracking-wide">Explorer</span>
+                            </Link>
+                            
+                            <Link 
+                                to="/premium" 
+                                onClick={closeMobile} 
+                                className="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/20 hover:bg-amber-100 dark:hover:bg-amber-950/30 border border-amber-100/50 dark:border-amber-950/10 transition-all text-center group"
+                            >
+                                <span className="text-2xl mb-1.5 transition-transform group-hover:scale-110">👑</span>
+                                <span className="text-[11px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-wide">Premium</span>
+                            </Link>
+
+                            <Link 
+                                to={token ? "/dashboard" : "/login"} 
+                                onClick={closeMobile} 
+                                className="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-purple-50 dark:bg-purple-950/20 hover:bg-purple-100 dark:hover:bg-purple-950/30 border border-purple-100/50 dark:border-purple-950/10 transition-all text-center group"
+                            >
+                                <span className="text-2xl mb-1.5 transition-transform group-hover:scale-110">🏠</span>
+                                <span className="text-[11px] font-black text-purple-700 dark:text-purple-400 uppercase tracking-wide">Tableau de bord</span>
+                            </Link>
+                        </div>
 
                         {token ? (
                             <>
-                                <Link to="/dashboard" onClick={closeMobile}
-                                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-slate-300 font-medium hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-700 dark:hover:text-blue-400 transition-colors">
-                                    🏠 <span>Tableau de bord</span>
-                                </Link>
+                                <div className="border-t border-gray-100 dark:border-slate-800 my-1" />
                                 <Link to="/trips" onClick={closeMobile}
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-slate-300 font-medium hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-700 dark:hover:text-blue-400 transition-colors">
                                     🚗 <span>Covoiturage</span>
