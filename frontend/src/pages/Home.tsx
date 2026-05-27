@@ -16,8 +16,9 @@ export default function Home() {
                 <div className="text-2xl font-bold tracking-tight text-slate-800">
                     Voisi<span className="text-primary-600">Go</span>
                 </div>
-                <div className="flex gap-4 items-center">
+                <div className="flex gap-4 items-center flex-wrap">
                     <Link to="/explore" className="text-slate-600 font-bold hover:text-primary-600 transition-colors">Explorer</Link>
+                    <Link to="/premium" className="text-amber-600 dark:text-amber-500 font-bold hover:text-amber-700 transition-colors flex items-center gap-1">👑 Premium & Sécurité</Link>
                     <div className="w-px h-6 bg-gray-300 mx-2"></div>
                     {localStorage.getItem('token') ? (
                         <Link to="/dashboard" className="bg-blue-600 text-white px-5 py-2 rounded-full font-bold shadow hover:bg-blue-700 transition-colors">
@@ -88,6 +89,98 @@ export default function Home() {
                             <div className="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center text-3xl mb-6">🛡️</div>
                             <h3 className="text-xl font-bold text-slate-800 mb-3">100% Sécurisé</h3>
                             <p className="text-slate-600 leading-relaxed">Profils vérifiés et avis communautaires pour voyager en toute sérénité.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Security, Trust & Premium Section */}
+            <div className="relative z-10 py-20 bg-slate-900 text-white overflow-hidden">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary-900/20 rounded-full blur-3xl pointer-events-none"></div>
+                <div className="max-w-7xl mx-auto px-6 relative z-10">
+                    <div className="grid lg:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <span className="inline-block px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-wider mb-4">
+                                🛡️ Charte de Confiance & Sécurité
+                            </span>
+                            <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-6">
+                                Un réseau local basé sur <br />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">la sécurité absolue</span>
+                            </h2>
+                            <p className="text-slate-300 text-lg leading-relaxed mb-8">
+                                Pour que l'entraide et le covoiturage se fassent l'esprit tranquille, VoisiGo propose des mécanismes de vérification avancés. En validant leur pièce d'identité officielle, les voisins obtiennent un badge de confiance vert <span className="text-emerald-400 font-bold">✓</span>, garantissant l'absence de fraude ou de faux comptes.
+                            </p>
+                            
+                            <div className="space-y-4 mb-8">
+                                <div className="flex items-start gap-3">
+                                    <span className="text-emerald-400 text-xl font-bold">✓</span>
+                                    <div>
+                                        <h4 className="font-bold text-white">Vérification d'Identité Sécurisée</h4>
+                                        <p className="text-slate-400 text-sm">Validation de CNI, Passeport ou Permis pour certifier chaque membre.</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                    <span className="text-emerald-400 text-xl font-bold">✓</span>
+                                    <div>
+                                        <h4 className="font-bold text-white">Modération active & Avis vérifiés</h4>
+                                        <p className="text-slate-400 text-sm">Système de notation et de commentaires sincères après chaque échange.</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                    <span className="text-emerald-400 text-xl font-bold">✓</span>
+                                    <div>
+                                        <h4 className="font-bold text-white">Protection Anti-Spam</h4>
+                                        <p className="text-slate-400 text-sm">Système de sécurité dynamique bloquant le spam et protégeant vos données.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Premium Card Display */}
+                        <div className="bg-white/5 backdrop-blur-md rounded-3xl p-8 border border-white/10 relative shadow-2xl">
+                            <div className="absolute top-0 right-0 bg-amber-500 text-slate-950 text-xs font-black uppercase px-4 py-1.5 rounded-bl-2xl rounded-tr-3xl shadow-md tracking-wider">
+                                Recommandé 👑
+                            </div>
+                            <h3 className="text-2xl font-black text-white mb-2 flex items-center gap-2">
+                                Plan Premium VoisiGo 
+                            </h3>
+                            <p className="text-slate-300 text-sm leading-relaxed mb-6">
+                                Soutenez notre projet communautaire tout en profitant d'avantages exclusifs de visibilité et de confort.
+                            </p>
+                            
+                            <ul className="space-y-3.5 mb-8 text-sm text-slate-200">
+                                <li className="flex items-center gap-2">
+                                    <span className="text-amber-400">👑</span>
+                                    <span>Badge Premium exclusif sur votre avatar</span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                    <span className="text-amber-400">✨</span>
+                                    <span>Lueur d'or de visibilité sur vos annonces</span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                    <span className="text-amber-400">🚫</span>
+                                    <span>Zéro publicité dans toute l'application</span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                    <span className="text-emerald-400">🛡️</span>
+                                    <span>Vérification d'identité gratuite incluse</span>
+                                </li>
+                            </ul>
+
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <Link
+                                    to="/premium"
+                                    className="flex-1 text-center py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-sm rounded-xl transition transform hover:-translate-y-0.5 shadow-lg shadow-amber-500/10"
+                                >
+                                    Découvrir le Plan Premium
+                                </Link>
+                                <Link
+                                    to="/register"
+                                    className="flex-1 text-center py-3 bg-white/10 hover:bg-white/20 text-white font-extrabold text-sm rounded-xl transition border border-white/10"
+                                >
+                                    S'inscrire gratuitement
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </div>

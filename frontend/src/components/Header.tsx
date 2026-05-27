@@ -141,6 +141,7 @@ export default function Header() {
                 {/* ── Desktop nav ── */}
                 <div className="hidden md:flex gap-4 items-center">
                     <Link to="/explore" className="font-medium text-gray-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Explorer</Link>
+                    <Link to="/premium" className="font-medium text-amber-600 dark:text-amber-500 hover:text-amber-700 transition-colors flex items-center gap-1">👑 Premium & Sécurité</Link>
 
                     {token ? (
                         <>
@@ -292,6 +293,10 @@ export default function Header() {
                         <Link to="/explore" onClick={closeMobile}
                             className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-slate-300 font-medium hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-700 dark:hover:text-blue-400 transition-colors">
                             🔍 <span>Explorer</span>
+                        </Link>
+                        <Link to="/premium" onClick={closeMobile}
+                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-slate-300 font-medium hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-700 dark:hover:text-blue-400 transition-colors">
+                            👑 <span>Premium & Sécurité</span>
                         </Link>
 
                         {token ? (
