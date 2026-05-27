@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { API_BASE_URL } from '../../lib/api';
 import { CATEGORY_EMOJIS } from '../../types';
@@ -7,7 +7,6 @@ import type { Service } from '../../types';
 import { useToast, useConfirm } from '../../context/UIContext';
 
 export default function ServicesList() {
-    const navigate = useNavigate();
     const [services, setServices] = useState<Service[]>([]);
     const [loading, setLoading] = useState(true);
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');

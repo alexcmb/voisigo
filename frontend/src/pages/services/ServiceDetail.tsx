@@ -1,12 +1,23 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import Layout from '../../components/Layout';
 import StarRating from '../../components/StarRating';
-import MapContainer from '../../components/MapContainer';
 import { API_BASE_URL } from '../../lib/api';
 import { CATEGORY_EMOJIS } from '../../types';
 import type { Service, Review } from '../../types';
 import { useToast, useConfirm } from '../../context/UIContext';
+
+// Fix Leaflet default marker icon
+const DefaultIcon = L.icon({
+    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+});
+L.Marker.prototype.options.icon = DefaultIcon;
 
 interface Author {
     id: string;
@@ -191,10 +202,19 @@ export default function ServiceDetail() {
                             <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Localisation</h2>
                             <div className="rounded-xl overflow-hidden border border-gray-100" style={{ height: 220 }}>
                                 <MapContainer
-                                    lat={service.lat}
-                                    lon={service.lon}
-                                    label={service.location || service.title}
-                                />
+                                    center={[service.lat, service.lon]}
+                                    zoom={14}
+                                    scrollWheelZoom={false}
+                                    style={{ height: '100%', width: '100%' }}
+                                >
+                                    <TileLayer
+                                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                    />
+                                    <Marker position={[service.lat, service.lon]}>
+                                        <Popup>{service.location || service.title}</Popup>
+                                    </Marker>
+                                </MapContainer>
                             </div>
                         </div>
                     )}
