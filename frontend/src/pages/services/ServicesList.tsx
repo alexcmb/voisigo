@@ -4,6 +4,7 @@ import Layout from '../../components/Layout';
 import { API_BASE_URL } from '../../lib/api';
 import { CATEGORY_EMOJIS } from '../../types';
 import type { Service } from '../../types';
+import { useToast, useConfirm } from '../../context/UIContext';
 
 export default function ServicesList() {
     const navigate = useNavigate();
@@ -11,6 +12,8 @@ export default function ServicesList() {
     const [loading, setLoading] = useState(true);
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
     const token = localStorage.getItem('token');
+    const toast = useToast();
+    const confirm = useConfirm();
 
     useEffect(() => {
         fetch(`${API_BASE_URL}/api/services`)
@@ -26,9 +29,15 @@ export default function ServicesList() {
             });
     }, []);
 
-    const handleDelete = async (serviceId: string) => {
-        if (!confirm('Voulez-vous vraiment supprimer cette annonce ?')) return;
-
+    const handleDelete = async (serviceId: string, e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const ok = await confirm('Supprimer cette annonce définitivement ?', {
+            title: 'Supprimer l\'annonce',
+            confirmLabel: 'Supprimer',
+            danger: true,
+        });
+        if (!ok) return;
         try {
             const res = await fetch(`${API_BASE_URL}/api/services/${serviceId}`, {
                 method: 'DELETE',
@@ -36,12 +45,13 @@ export default function ServicesList() {
             });
             if (res.ok) {
                 setServices(prev => prev.filter(s => s.id !== serviceId));
+                toast.success('Annonce supprimée');
             } else {
                 const data = await res.json();
-                alert(data.message || 'Erreur lors de la suppression');
+                toast.error(data.message || 'Erreur lors de la suppression');
             }
         } catch {
-            alert('Erreur réseau');
+            toast.error('Erreur réseau');
         }
     };
 
@@ -66,16 +76,20 @@ export default function ServicesList() {
                     ) : (
                         <div className="grid gap-4">
                             {services.map(service => (
-                                <div key={service.id} className={`bg-white p-6 rounded-xl shadow-md border-l-4 ${service.type === 'request' ? 'border-orange-400' : 'border-green-500'} hover:shadow-lg transition-shadow`}>
+                                <Link
+                                    key={service.id}
+                                    to={`/services/${service.id}`}
+                                    className={`bg-white p-6 rounded-xl shadow-md border-l-4 ${service.type === 'request' ? 'border-orange-400' : 'border-green-500'} hover:shadow-lg transition-shadow block group`}
+                                >
                                     <div className="flex justify-between items-start mb-2">
                                         <span className={`px-3 py-1 rounded-full text-sm font-bold uppercase ${service.type === 'request' ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'}`}>
-                                            {service.type === 'request' ? 'Demande' : 'Proposition'}
+                                            {service.type === 'request' ? '🙋 Demande' : '🤲 Proposition'}
                                         </span>
                                         <div className="flex items-center gap-2">
                                             <span className="text-2xl" title={service.category}>{CATEGORY_EMOJIS[service.category]}</span>
                                             {currentUser?.id && service.authorId === currentUser.id && (
                                                 <button
-                                                    onClick={() => handleDelete(service.id)}
+                                                    onClick={(e) => handleDelete(service.id, e)}
                                                     className="text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-lg transition-colors"
                                                     title="Supprimer mon annonce"
                                                 >
@@ -85,14 +99,14 @@ export default function ServicesList() {
                                         </div>
                                     </div>
 
-                                    <h3 className="text-xl font-bold text-gray-900 mb-2">{service.title}</h3>
+                                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-purple-700 transition-colors">{service.title}</h3>
                                     {service.location && (
                                         <div className="flex items-center text-gray-500 mb-2">
                                             <span className="mr-1">📍</span>
                                             <span className="text-sm">{service.location}</span>
                                         </div>
                                     )}
-                                    <p className="text-gray-600 text-lg mb-4">{service.description}</p>
+                                    <p className="text-gray-600 mb-4 line-clamp-2">{service.description}</p>
 
                                     <div className="flex justify-between items-end border-t pt-4 mt-2">
                                         <div className="text-gray-500 text-sm">
@@ -101,24 +115,11 @@ export default function ServicesList() {
                                             </span>
                                             Par <span className="font-semibold">{service.authorName}</span> • {new Date(service.date).toLocaleDateString()}
                                         </div>
-                                        <button
-                                            onClick={async () => {
-                                                try {
-                                                    const res = await fetch(`${API_BASE_URL}/api/messages/conversations`, {
-                                                        method: 'POST',
-                                                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                                                        body: JSON.stringify({ recipientId: service.authorId, relatedType: 'service', relatedId: service.id }),
-                                                    });
-                                                    if (res.ok) { const data = await res.json(); navigate(`/messages/${data.conversation.id}`); }
-                                                    else { const data = await res.json(); alert(data.message || 'Erreur'); }
-                                                } catch { alert('Erreur réseau'); }
-                                            }}
-                                            className="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg font-semibold hover:bg-blue-200 transition-colors"
-                                        >
-                                            Contacter
-                                        </button>
+                                        <span className="text-purple-600 text-sm font-semibold group-hover:translate-x-1 transition-transform">
+                                            Voir l'annonce →
+                                        </span>
                                     </div>
-                                </div>
+                                </Link>
                             ))}
                         </div>
                     )}

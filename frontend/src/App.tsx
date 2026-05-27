@@ -8,6 +8,7 @@ import TripsList from './pages/trips/TripsList';
 import TripDetail from './pages/trips/TripDetail';
 import CreateService from './pages/services/CreateService';
 import ServicesList from './pages/services/ServicesList';
+import ServiceDetail from './pages/services/ServiceDetail';
 import EditProfile from './pages/profile/EditProfile';
 import PublicProfile from './pages/profile/PublicProfile';
 import Explore from './pages/Explore';
@@ -31,6 +32,7 @@ function App() {
           <Route path="/trips/:id" element={<TripDetail />} />
           <Route path="/trips" element={<ProtectedRoute><TripsList /></ProtectedRoute>} />
           <Route path="/services/create" element={<ProtectedRoute><CreateService /></ProtectedRoute>} />
+          <Route path="/services/:id" element={<ServiceDetail />} />
           <Route path="/services" element={<ProtectedRoute><ServicesList /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
           <Route path="/users/:id" element={<PublicProfile />} />

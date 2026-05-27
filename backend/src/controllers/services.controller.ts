@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { findUserById, getServices as dbGetServices, createService as dbCreateService, findServiceById, deleteServiceById, Service } from '../utils/db';
+import { findUserById, getServices as dbGetServices, createService as dbCreateService, findServiceById, deleteServiceById, getAverageRating, getReviewsForUser, Service } from '../utils/db';
 import { z } from 'zod';
 import { AuthRequest } from '../middleware/auth.middleware';
 
@@ -90,3 +90,31 @@ export const deleteService = async (req: AuthRequest, res: Response) => {
         res.status(400).json({ message: error.message || 'Error deleting service' });
     }
 };
+
+export const getServiceById = async (req: AuthRequest, res: Response) => {
+    try {
+        const id = req.params.id as string;
+        const service = await findServiceById(id);
+
+        if (!service) {
+            res.status(404).json({ message: 'Service not found' });
+            return;
+        }
+
+        const author = await findUserById(service.authorId);
+        const rating = await getAverageRating(service.authorId);
+        const reviews = await getReviewsForUser(service.authorId);
+
+        res.json({
+            service,
+            author: author
+                ? { id: author.id, name: author.name, bio: author.bio, avatarUrl: author.avatarUrl }
+                : null,
+            authorRating: { avg: rating.avg, count: rating.count },
+            reviews: reviews.slice(0, 5),
+        });
+    } catch (error: any) {
+        res.status(500).json({ message: error.message || 'Error fetching service' });
+    }
+};
+
