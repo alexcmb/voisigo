@@ -29,6 +29,8 @@ export interface Trip {
     description?: string;
     completed?: boolean;
     createdAt: string;
+    vehicleType?: string;
+    fuelType?: string;
 }
 
 export interface Service {
@@ -157,6 +159,13 @@ export const initDb = async (): Promise<void> => {
             console.log('Columns isPremium/isVerified already exist or alteration failed:', e);
         }
 
+        try {
+            await client.query('ALTER TABLE trips ADD COLUMN IF NOT EXISTS "vehicleType" TEXT DEFAULT \'citadine\'');
+            await client.query('ALTER TABLE trips ADD COLUMN IF NOT EXISTS "fuelType" TEXT DEFAULT \'essence\'');
+        } catch (e) {
+            console.log('Columns vehicleType/fuelType already exist or alteration failed:', e);
+        }
+
         await client.query(`
             CREATE TABLE IF NOT EXISTS trips (
                 id TEXT PRIMARY KEY,
@@ -174,6 +183,8 @@ export const initDb = async (): Promise<void> => {
                 description TEXT DEFAULT '',
                 "createdAt" TEXT NOT NULL,
                 completed BOOLEAN DEFAULT FALSE,
+                "vehicleType" TEXT DEFAULT 'citadine',
+                "fuelType" TEXT DEFAULT 'essence',
                 FOREIGN KEY ("driverId") REFERENCES users(id)
             )
         `);
@@ -334,14 +345,16 @@ export const createTrip = async (trip: Trip): Promise<void> => {
         `INSERT INTO trips
             (id, "driverId", "driverName", departure, destination,
              "departureLat", "departureLon", "destinationLat", "destinationLon",
-             date, price, seats, description, "createdAt")
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
+             date, price, seats, description, "createdAt", "vehicleType", "fuelType")
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`,
         [
             trip.id, trip.driverId, trip.driverName, trip.departure, trip.destination,
             trip.departureLat ?? null, trip.departureLon ?? null,
             trip.destinationLat ?? null, trip.destinationLon ?? null,
             trip.date, trip.price, trip.seats,
             trip.description ?? '', trip.createdAt,
+            trip.vehicleType ?? 'citadine',
+            trip.fuelType ?? 'essence',
         ]
     );
 };

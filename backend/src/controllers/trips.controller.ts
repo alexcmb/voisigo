@@ -27,6 +27,8 @@ const tripSchema = z.object({
     price: z.number().min(0),
     seats: z.number().min(1),
     description: z.string().optional(),
+    vehicleType: z.string().optional(),
+    fuelType: z.string().optional(),
 });
 
 export const createTrip = async (req: AuthRequest, res: Response) => {

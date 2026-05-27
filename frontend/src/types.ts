@@ -30,6 +30,8 @@ export interface Trip {
     pendingBookingsCount?: number;
     driverIsPremium?: boolean;
     driverIsVerified?: boolean;
+    vehicleType?: string;
+    fuelType?: string;
 }
 
 export interface Service {

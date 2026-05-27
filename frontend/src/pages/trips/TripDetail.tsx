@@ -357,6 +357,16 @@ export default function TripDetail() {
                                     <p className="text-sm text-gray-600 leading-relaxed">💬 {trip.description}</p>
                                 </div>
                             )}
+
+                            {/* Vehicle Details */}
+                            {trip.vehicleType && (
+                                <div className="mt-4 p-3.5 bg-blue-50 dark:bg-slate-900/50 border border-blue-100 dark:border-slate-800 rounded-xl flex items-center gap-3 text-sm text-gray-700 dark:text-slate-300">
+                                    <span className="text-xl">🚗</span>
+                                    <div>
+                                        <span className="font-bold text-slate-800 dark:text-white capitalize">Véhicule de voyage :</span> {trip.vehicleType === 'electrique' ? 'Électrique ⚡' : `${trip.vehicleType} (${trip.fuelType})`}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 
