@@ -1,7 +1,19 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
 
 export default function Home() {
+    const [mobileOpen, setMobileOpen] = useState(false);
+
+    const closeMobile = () => setMobileOpen(false);
+
+    // Close mobile menu on resize to desktop
+    useEffect(() => {
+        const handler = () => { if (window.innerWidth >= 768) setMobileOpen(false); };
+        window.addEventListener('resize', handler);
+        return () => window.removeEventListener('resize', handler);
+    }, []);
+
     return (
         <div className="min-h-screen relative overflow-hidden bg-slate-50 font-sans">
             {/* Abstract Background Shapes */}
@@ -12,13 +24,15 @@ export default function Home() {
             </div>
 
             {/* Navbar */}
-            <nav className="relative z-20 flex justify-between items-center px-8 py-6 max-w-7xl mx-auto">
+            <nav className="relative z-30 flex justify-between items-center px-8 py-6 max-w-7xl mx-auto">
                 <div className="text-2xl font-bold tracking-tight text-slate-800">
                     Voisi<span className="text-primary-600">Go</span>
                 </div>
-                <div className="flex gap-4 items-center flex-wrap">
+
+                {/* Desktop Nav */}
+                <div className="hidden md:flex gap-4 items-center">
                     <Link to="/explore" className="text-slate-600 font-bold hover:text-primary-600 transition-colors">Explorer</Link>
-                    <Link to="/premium" className="text-amber-600 dark:text-amber-500 font-bold hover:text-amber-700 transition-colors flex items-center gap-1">👑 Premium</Link>
+                    <Link to="/premium" className="text-amber-600 font-bold hover:text-amber-700 transition-colors flex items-center gap-1">👑 Premium</Link>
                     <div className="w-px h-6 bg-gray-300 mx-2"></div>
                     {localStorage.getItem('token') ? (
                         <Link to="/dashboard" className="bg-blue-600 text-white px-5 py-2 rounded-full font-bold shadow hover:bg-blue-700 transition-colors">
@@ -31,7 +45,97 @@ export default function Home() {
                         </>
                     )}
                 </div>
+
+                {/* Mobile Menu Button */}
+                <div className="flex md:hidden items-center">
+                    <button
+                        onClick={() => setMobileOpen(o => !o)}
+                        aria-label={mobileOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+                        className="flex flex-col justify-center items-center w-10 h-10 rounded-xl hover:bg-slate-100/80 transition-colors gap-1.5 cursor-pointer relative z-50 border border-slate-200/50 bg-white/50 backdrop-blur-sm shadow-sm"
+                    >
+                        <span className={`block w-5 h-0.5 bg-slate-700 rounded transition-all duration-300 ${mobileOpen ? 'translate-y-2 rotate-45' : ''}`} />
+                        <span className={`block w-5 h-0.5 bg-slate-700 rounded transition-all duration-300 ${mobileOpen ? 'opacity-0 scale-x-0' : ''}`} />
+                        <span className={`block w-5 h-0.5 bg-slate-700 rounded transition-all duration-300 ${mobileOpen ? '-translate-y-2 -rotate-45' : ''}`} />
+                    </button>
+                </div>
             </nav>
+
+            {/* Mobile menu overlay */}
+            {mobileOpen && (
+                <div className="md:hidden fixed inset-0 z-25 flex flex-col" style={{ top: 76 }}>
+                    {/* Menu panel */}
+                    <div className="bg-white/95 backdrop-blur-md border-b border-slate-200/50 shadow-xl px-6 py-5 flex flex-col gap-3.5 animate-slideDown">
+                        {/* Native-like Quick Access Grid */}
+                        <div className="grid grid-cols-3 gap-3 mb-1">
+                            <Link 
+                                to="/explore" 
+                                onClick={closeMobile} 
+                                className="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-blue-50 hover:bg-blue-100/80 border border-blue-100/50 transition-all text-center group"
+                            >
+                                <span className="text-2xl mb-1.5 transition-transform group-hover:scale-110">🔍</span>
+                                <span className="text-[11px] font-black text-blue-700 uppercase tracking-wide">Explorer</span>
+                            </Link>
+                            
+                            <Link 
+                                to="/premium" 
+                                onClick={closeMobile} 
+                                className="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-amber-50 hover:bg-amber-100/80 border border-amber-100/50 transition-all text-center group"
+                            >
+                                <span className="text-2xl mb-1.5 transition-transform group-hover:scale-110">👑</span>
+                                <span className="text-[11px] font-black text-amber-700 uppercase tracking-wide">Premium</span>
+                            </Link>
+
+                            <Link 
+                                to={localStorage.getItem('token') ? "/dashboard" : "/login"} 
+                                onClick={closeMobile} 
+                                className="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-purple-50 hover:bg-purple-100/80 border border-purple-100/50 transition-all text-center group"
+                            >
+                                <span className="text-2xl mb-1.5 transition-transform group-hover:scale-110">🏠</span>
+                                <span className="text-[11px] font-black text-purple-700 uppercase tracking-wide">Tableau de bord</span>
+                            </Link>
+                        </div>
+
+                        {localStorage.getItem('token') ? (
+                            <>
+                                <div className="border-t border-slate-100 my-1" />
+                                <Link 
+                                    to="/dashboard" 
+                                    onClick={closeMobile} 
+                                    className="flex items-center justify-center gap-2 py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors shadow-md shadow-blue-500/20"
+                                >
+                                    💻 Mon Tableau de bord
+                                </Link>
+                            </>
+                        ) : (
+                            <>
+                                <div className="border-t border-slate-100 my-1" />
+                                <div className="flex flex-col gap-2">
+                                    <Link 
+                                        to="/login" 
+                                        onClick={closeMobile} 
+                                        className="flex items-center justify-center gap-2 py-3 rounded-xl border border-slate-200 text-slate-700 font-bold hover:bg-slate-50 transition-colors"
+                                    >
+                                        🔑 Connexion
+                                    </Link>
+                                    <Link 
+                                        to="/register" 
+                                        onClick={closeMobile} 
+                                        className="flex items-center justify-center gap-2 py-3 rounded-xl bg-primary-600 text-white font-bold hover:bg-primary-700 transition-colors shadow-md shadow-primary-500/20"
+                                    >
+                                        ✨ S'inscrire
+                                    </Link>
+                                </div>
+                            </>
+                        )}
+                    </div>
+
+                    {/* Backdrop */}
+                    <div
+                        className="flex-1 bg-black/20 backdrop-blur-sm"
+                        onClick={closeMobile}
+                    />
+                </div>
+            )}
 
             {/* Hero Section */}
             <div className="relative z-10 flex flex-col items-center justify-center pt-10 pb-20 px-4">
