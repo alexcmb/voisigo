@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -26,7 +27,8 @@ function App() {
     <BrowserRouter>
       <ThemeProvider>
         <UIProvider>
-        <Routes>
+          <Analytics />
+          <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/explore" element={<Explore />} />
           <Route path="/premium" element={<Premium />} />
